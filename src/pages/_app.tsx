@@ -7,14 +7,14 @@ import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import type { AppRouter } from "../server/router";
 import "../styles/globals.css";
+import { ThemeProvider } from "@material-tailwind/react";
 
-const MyApp: AppType = ({
-  Component,
-  pageProps: { session, ...pageProps },
-}) => {
+const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <ThemeProvider>
+        <Component {...pageProps} />
+      </ThemeProvider>
     </SessionProvider>
   );
 };
@@ -38,12 +38,12 @@ export default withTRPC<AppRouter>({
         loggerLink({
           enabled: (opts) =>
             process.env.NODE_ENV === "development" ||
-            (opts.direction === "down" && opts.result instanceof Error),
+            (opts.direction === "down" && opts.result instanceof Error)
         }),
-        httpBatchLink({ url }),
+        httpBatchLink({ url })
       ],
       url,
-      transformer: superjson,
+      transformer: superjson
       /**
        * @link https://react-query.tanstack.com/reference/QueryClient
        */
@@ -53,5 +53,5 @@ export default withTRPC<AppRouter>({
   /**
    * @link https://trpc.io/docs/ssr
    */
-  ssr: false,
+  ssr: false
 })(MyApp);
