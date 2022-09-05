@@ -5,7 +5,25 @@ const withMT = require("@material-tailwind/react/utils/withMT");
 module.exports = withMT({
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        fav: {
+          50: "#DAD9C6",
+          100: "#A9DDB6",
+          200: "#6CC276",
+          300: "#619b67",
+          400: "#5B6E6E",
+          500: "#678583",
+          600: "#4B605F"
+        },
+        me: {
+          50: "#383838"
+        }
+      },
+      fontFamily: {
+        sans: ["'M PLUS Rounded 1c'", "Roboto", "sans-serif"]
+      }
+    }
   },
   plugins: []
 });
