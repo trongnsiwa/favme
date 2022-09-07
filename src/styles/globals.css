@@ -8,6 +8,11 @@
   html {
     font-family: "M PLUS Rounded 1c", Roboto system-ui, sans-serif;
   }
+
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
 }
 
 @layer components {
@@ -21,6 +26,14 @@
 
   .btn-fav {
     @apply !bg-fav-200 hover:!bg-fav-300;
+  }
+
+  .btn-discord {
+    @apply !bg-[#5865F2];
+  }
+
+  .btn-google {
+    @apply !bg-white;
   }
 }
 

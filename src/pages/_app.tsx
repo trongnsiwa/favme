@@ -24,7 +24,7 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
       <SessionProvider session={session}>
         <ThemeProvider>
           <ScreenLoading />
-          <NextNProgress color="#678583" height={3} />
+          <NextNProgress color="#678583" height={3} options={{ showSpinner: false }} />
           <Component {...pageProps} />
         </ThemeProvider>
       </SessionProvider>

@@ -1,6 +1,6 @@
 import { Button } from "@material-tailwind/react";
 import type { NextPage } from "next";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useStore } from "src/store/store";
 import LoginPage from "./login";
@@ -16,7 +16,9 @@ const Home: NextPage = () => {
   return (
     <>
       <main className="container mx-auto min-h-screen">
-        <Button variant="gradient">Button</Button>
+        <Button variant="gradient" onClick={() => signOut()}>
+          Logout
+        </Button>
       </main>
     </>
   );
