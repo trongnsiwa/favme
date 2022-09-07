@@ -29,11 +29,27 @@
   }
 
   .btn-discord {
-    @apply !bg-[#5865F2];
+    @apply !bg-[#5865F2] !text-white;
   }
 
   .btn-google {
     @apply !bg-white;
+  }
+
+  .btn-icon {
+    @apply !text-fav-600 !border-fav-600 !ring-transparent;
+  }
+
+  .btn-avatar {
+    @apply hover:!bg-transparent !text-fav-600 active:!bg-transparent !rounded-full !p-0;
+  }
+
+  .menu-item {
+    @apply !text-sm !text-fav-600 !text-left;
+  }
+
+  .btn-menu {
+    @apply hover:!bg-transparent font-semibold !text-sm !text-fav-600 !text-left active:!bg-transparent !px-0;
   }
 }
 

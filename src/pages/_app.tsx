@@ -11,6 +11,17 @@ import { ThemeProvider } from "@material-tailwind/react";
 import Head from "next/head";
 import ScreenLoading from "@components/screen-loading";
 import NextNProgress from "nextjs-progressbar";
+import { useRouter } from "next/router";
+import Layout from "@components/layouts/layout";
+
+const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+
+  if (["/login", "sign-up"].indexOf(router.pathname) > -1) {
+    return <>{children}</>;
+  }
+  return <Layout>{children}</Layout>;
+};
 
 const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (
@@ -25,7 +36,9 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
         <ThemeProvider>
           <ScreenLoading />
           <NextNProgress color="#678583" height={3} options={{ showSpinner: false }} />
-          <Component {...pageProps} />
+          <GlobalLayout>
+            <Component {...pageProps} />
+          </GlobalLayout>
         </ThemeProvider>
       </SessionProvider>
     </>
