@@ -8,14 +8,27 @@ import superjson from "superjson";
 import type { AppRouter } from "../server/router";
 import "../styles/globals.css";
 import { ThemeProvider } from "@material-tailwind/react";
+import Head from "next/head";
+import ScreenLoading from "@components/screen-loading";
+import NextNProgress from "nextjs-progressbar";
 
 const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (
-    <SessionProvider session={session}>
-      <ThemeProvider>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </SessionProvider>
+    <>
+      <Head>
+        <title>Fav.me</title>
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+        <meta name="description" content="A favorite link storage app made by trongnsi" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <SessionProvider session={session}>
+        <ThemeProvider>
+          <ScreenLoading />
+          <NextNProgress color="#678583" height={3} />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </SessionProvider>
+    </>
   );
 };
 

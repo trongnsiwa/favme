@@ -16,14 +16,39 @@
   }
 
   .btn {
-    @apply !text-sm w-full;
+    @apply !text-base w-full flex items-center justify-center gap-3 !normal-case !text-black !bg-white;
   }
 
   .btn-fav {
     @apply !bg-fav-200 hover:!bg-fav-300;
   }
+}
 
-  .btn-git {
-    @apply !text-black !bg-white;
+.spinner {
+  width: 80px;
+  aspect-ratio: 1;
+  display: grid;
+  border: 4px solid #0000;
+  border-radius: 50%;
+  border-right-color: #6cc276;
+  animation: s5 1s infinite linear;
+}
+.spinner::before,
+.spinner::after {
+  content: "";
+  grid-area: 1/1;
+  margin: 2px;
+  border: inherit;
+  border-radius: 50%;
+  animation: s5 2s infinite;
+}
+.spinner::after {
+  margin: 8px;
+  animation-duration: 3s;
+}
+
+@keyframes s5 {
+  100% {
+    transform: rotate(1turn);
   }
 }
