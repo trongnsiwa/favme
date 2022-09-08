@@ -6,14 +6,13 @@ import GooglepProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../server/db/client";
 import { env } from "../../../env/server.mjs";
-import { ObjectID } from "bson";
 
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
     session({ session, user }) {
       if (session.user) {
-        session.user._id = new ObjectID(user.id).toString();
+        session.user._id = user.id;
       }
       return session;
     }

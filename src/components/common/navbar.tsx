@@ -1,9 +1,9 @@
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef } from "react";
 import { useStore } from "src/store/store";
-import { useBoolean, useMediaQuery, useOnClickOutside } from "usehooks-ts";
+import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import {
   Avatar,
   Button,
@@ -14,15 +14,11 @@ import {
   MenuList,
   Navbar as MTNavbar
 } from "@material-tailwind/react";
-import { RiBarChartHorizontalFill, RiMenu2Line } from "react-icons/ri";
+import { RiBarChartHorizontalFill } from "react-icons/ri";
 import { IoLogOutOutline } from "react-icons/io5";
-import classNames from "classnames";
-import Link from "next/link";
-import Image from "next/image";
 
 function Navbar() {
   const { setFalse, toggle } = useBoolean(false);
-  const matches = useMediaQuery("(min-width: 1440px)");
 
   const router = useRouter();
   const menuRef = useRef(null);
@@ -43,15 +39,15 @@ function Navbar() {
   return (
     <AnimatePresence initial={false}>
       <MTNavbar
-        className={`mb-2 bg-fav-200 shadow-lg px-3 fixed rounded-none border-none ${
-          !openSidebar ? "w-[calc(100%-80px)]" : "w-[calc(100%-280px)]"
-        }`}
+        className={`bg-fav-200 shadow-lg px-3 fixed rounded-none border-none right-0 ${
+          openSidebar ? "w-[calc(100%-280px)]" : "w-full"
+        } h-[80px] max-w-none`}
       >
-        <div className="flex flex-wrap items-center justify-between w-full">
+        <div className="flex items-center justify-between h-full w-full">
           <IconButton
-            className={matches ? "hidden" : "btn-icon"}
+            className="btn-icon"
             variant="outlined"
-            onClick={() => toggleSidebar()}
+            onClick={() => toggleSidebar(!openSidebar)}
             size="lg"
           >
             <RiBarChartHorizontalFill className="w-8 h-8" />
@@ -60,7 +56,7 @@ function Navbar() {
             <MenuHandler>
               <Button variant="text" onClick={toggle} className="btn-avatar">
                 <Avatar
-                  className="avatar cursor-pointer"
+                  className="avatar cursor-pointer bg-white"
                   variant="circular"
                   src={
                     session && session.user?.image
@@ -78,7 +74,7 @@ function Navbar() {
               <MenuItem className="menu-item">
                 <Button variant="text" onClick={logOut} className="btn-menu" ripple={false}>
                   <IoLogOutOutline className="inline-block w-5 h-5 mr-2" />
-                  Đăng xuất
+                  Logout
                 </Button>
               </MenuItem>
             </MenuList>

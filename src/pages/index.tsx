@@ -1,11 +1,13 @@
+import { useCallback, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
-import type { NextPage } from "next";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useStore } from "src/store/store";
-import LoginPage from "./login";
+import { setCookie } from "cookies-next";
+import { GetServerSideProps } from "next";
+import { trpc } from "src/utils/trpc";
+import { defaultCategories } from "src/schemas/category.schema";
 
-const Home: NextPage = () => {
+const Home = ({ pageVisited }: { pageVisited: boolean }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -13,15 +15,37 @@ const Home: NextPage = () => {
     router.replace("/login");
   }
 
+  const { mutate, error } = trpc.useMutation(["categories.create-category"]);
+
+  const generateDefaultCategories = useCallback(() => {
+    defaultCategories.forEach((category, index) => {
+      if (index === defaultCategories.length + 1) {
+        setCookie("pageVisited", true);
+      } else {
+        mutate(category);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!pageVisited && session?.user) {
+      generateDefaultCategories();
+    }
+  }, []);
+
   return (
     <>
-      <main className="container mx-auto min-h-screen">
-        <Button variant="gradient" onClick={() => signOut()}>
-          Logout
-        </Button>
-      </main>
+      <Button variant="gradient" onClick={() => signOut()}>
+        Logout
+      </Button>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { pageVisited } = ctx.req.cookies;
+
+  return { props: { pageVisited: pageVisited ?? null } };
 };
 
 export default Home;

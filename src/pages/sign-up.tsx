@@ -58,7 +58,7 @@ function SignUpPage({ providers }: { providers: Record<string, Provider> }) {
       <div className="w-[35em] min-h-[calc(100vh-500px)] bg-white rounded-2xl shadow-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-20 py-10">
         <form>
           <div className="w-1/2 mx-auto mb-2">
-            <Image src={favmeLogo} alt="Google" objectFit="fill" />
+            <Image src={favmeLogo} alt="Favme" objectFit="fill" />
           </div>
           <Typography variant="h3" className="flex text-me-50 font-extrabold gap-2">
             <span className="text-fav-300">Join</span> now!
