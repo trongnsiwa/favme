@@ -15,7 +15,7 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
     router.replace("/login");
   }
 
-  const { mutate, error } = trpc.useMutation(["categories.create-category"]);
+  const { mutate } = trpc.useMutation(["categories.create-category"]);
 
   const generateDefaultCategories = useCallback(() => {
     defaultCategories.forEach((category, index) => {
@@ -33,13 +33,7 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
     }
   }, []);
 
-  return (
-    <>
-      <Button variant="gradient" onClick={() => signOut()}>
-        Logout
-      </Button>
-    </>
-  );
+  return <></>;
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

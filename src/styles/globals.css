@@ -51,6 +51,18 @@
   .btn-menu {
     @apply hover:!bg-transparent font-semibold !text-sm !text-fav-600 !text-left active:!bg-transparent !px-0;
   }
+
+  .btn-add {
+    @apply hover:!bg-fav-400 !bg-fav-600 !text-base !text-white active:!bg-fav-400 flex items-center hover:!text-fav-100 shadow-fav-200/20 hover:!shadow-fav-200/80;
+  }
+
+  .search-bar {
+    @apply text-base outline-0 !bg-white !rounded-lg focus:!ring-fav-200 focus:!border-fav-200 placeholder-shown:!border-transparent placeholder-shown:!border-t-0 focus-visible:ring-0;
+  }
+
+  .search-bar-container label {
+    @apply !hidden;
+  }
 }
 
 .spinner {

@@ -7,26 +7,30 @@ import favmeLogo from "@public/favme-white-text-logo.png";
 import { trpc } from "src/utils/trpc";
 import { DynamicFaIcon } from "@components/dynamic-icon";
 import * as Icons from "react-icons/fa";
+import { IconButton, Tooltip } from "@material-tailwind/react";
+import { BiCategory } from "react-icons/bi";
 
 function Sidebar() {
   const router = useRouter();
 
   const openSidebar = useStore((state) => state.openSidebar);
 
-  const { data, isLoading } = trpc.useQuery(["categories.categories"]);
+  const { data, isLoading } = trpc.useQuery(["categories.categories"], {
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false
+  });
 
   return (
     <AnimatePresence initial={false}>
       {openSidebar && (
         <motion.div
-          className="bg-fav-600 h-screen fixed"
-          initial={{ width: "0", x: "-100%" }}
+          className="bg-fav-600 h-screen top-0 left-0 fixed w-[280px]"
+          initial={{ x: "-100%" }}
           animate={{
-            width: "280px",
-            x: 0
+            x: "0%"
           }}
           exit={{
-            width: "0",
             x: "-100%"
           }}
           transition={{ type: "spring", bounce: 0, duration: 0.4 }}
@@ -37,17 +41,19 @@ function Sidebar() {
             </div>
           </div>
 
-          <ul className="flex flex-col p-4 overflow-y-auto text-base-content h-[calc(100vh-80px)] relative">
+          <ul
+            className={`flex flex-col p-4 ${
+              openSidebar ? "overflow-y-auto h-[calc(100vh-80px)]" : ""
+            } text-base-content relative`}
+          >
             {isLoading
-              ? Array.from(Array(20), (e, i) => i + 1).map(() => (
-                  <>
-                    <li className="bg-fav-500 rounded-lg mb-2 animate-pulse">
-                      <div className={`flex items-center m-4 cursor-pointer gap-3`}>
-                        <div className="w-8 h-8 rounded-full bg-fav-400" />
-                        <div className="w-32 h-4 rounded-sm bg-fav-400" />
-                      </div>
-                    </li>
-                  </>
+              ? Array.from(Array(20), (e, i) => i + 1).map((index) => (
+                  <li className="bg-fav-500 rounded-lg mb-2 animate-pulse" key={`pulse_${index}`}>
+                    <div className={`flex items-center m-4 cursor-pointer gap-3`}>
+                      <div className="w-8 h-8 rounded-full bg-fav-400" />
+                      <div className="w-32 h-4 rounded-sm bg-fav-400" />
+                    </div>
+                  </li>
                 ))
               : data &&
                 data.map((category, index) => (
@@ -73,6 +79,23 @@ function Sidebar() {
                   </li>
                 ))}
           </ul>
+
+          <div className="absolute z-10 bottom-10 left-1/2 -translate-x-1/2">
+            <Tooltip
+              content="Manage Category"
+              animate={{
+                mount: { scale: 1, y: 0 },
+                unmount: { scale: 0, y: 25 }
+              }}
+            >
+              <IconButton
+                size="lg"
+                className="!rounded-full bg-fav-200 !opacity-100 !w-16 !h-16 !max-w-none !max-h-fit shadow-fav-200/20 hover:!shadow-fav-200/40"
+              >
+                <BiCategory className="!w-8 !h-8 text-white" />
+              </IconButton>
+            </Tooltip>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

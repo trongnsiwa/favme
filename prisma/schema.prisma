@@ -78,21 +78,20 @@ model Favorite {
     name        String
     description String
     slug        String @unique
+    cover       String
 
     createdAt  DateTime       @default(now())
     updatedAt  DateTime       @updatedAt
-    status     FavoriteStatus @relation(fields: [statusId], references: [id])
-    statusId   String         @db.ObjectId
+    status     FavoriteStatus @default(UNFAVORED)
     category   Category       @relation(fields: [categoryId], references: [id])
     categoryId String         @db.ObjectId
     creator    User           @relation(fields: [creatorId], references: [id])
     creatorId  String         @db.ObjectId
 
-    @@unique([id, statusId, categoryId, creatorId])
+    @@unique([id, categoryId, creatorId])
 }
 
-model FavoriteStatus {
-    id        String     @id @default(auto()) @map("_id") @db.ObjectId
-    name      String
-    favorites Favorite[]
+enum FavoriteStatus {
+    UNFAVORED
+    FAVORED
 }
