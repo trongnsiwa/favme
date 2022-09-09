@@ -4,7 +4,8 @@ import { useStore } from "src/store/store";
 import Navbar from "../common/navbar";
 import { RiHeartAddLine } from "react-icons/ri";
 import { useBoolean } from "usehooks-ts";
-import AddNewDialog from "@components/dialogs/add-new";
+import AddNewDialog from "@components/dialogs/add-new-fav";
+import FavDetailDialog from "@components/dialogs/fav-detail";
 
 type LayoutProps = { children: React.ReactNode };
 
@@ -19,7 +20,9 @@ function Layout({ children }: LayoutProps) {
       <main
         className={`overflow-auto h-[calc(100%-80px)] ${
           openSidebar ? "w-[calc(100vw-280px)]" : "w-full"
-        } right-0 bottom-0 fixed p-10`}
+        } right-0 bottom-0 fixed p-10 transition-all ${
+          openSidebar ? "duration-400" : "duration-500"
+        }`}
       >
         {children}
         <div className="absolute z-10 bottom-10 left-1/2 -translate-x-1/2">
@@ -42,6 +45,7 @@ function Layout({ children }: LayoutProps) {
       </main>
 
       <AddNewDialog open={isAdd} handleOpen={toggle} />
+      <FavDetailDialog />
     </div>
   );
 }

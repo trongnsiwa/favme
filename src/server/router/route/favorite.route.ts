@@ -1,5 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import {
+  changeStatusSchema,
   createFavoriteSchema,
   getFavoriteByCategorySchemma
 } from "./../../../schemas/favorite.schema";
@@ -80,5 +81,20 @@ export const favoriteRouter = createRouter()
         favorites,
         nextCursor
       };
+    }
+  })
+  .mutation("change-status", {
+    input: changeStatusSchema,
+    async resolve({ ctx, input }) {
+      const category = await ctx.prisma.favorite.update({
+        where: {
+          id: input.id
+        },
+        data: {
+          status: input.status
+        }
+      });
+
+      return category;
     }
   });

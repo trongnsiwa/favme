@@ -1,6 +1,6 @@
 import { CreateCategoryInput } from "./../schemas/category.schema";
 import create from "zustand";
-import { Category } from "@prisma/client";
+import { Category, Favorite } from "@prisma/client";
 
 interface StoreState {
   screenLoading: boolean;
@@ -9,6 +9,10 @@ interface StoreState {
   toggleSidebar: (open: boolean) => void;
   ownCategories: Category[];
   setOwnCategories: (categories: Category[]) => void;
+  showFavorite: boolean;
+  toggleFavorite: () => void;
+  favorite: (Favorite & { category: Category }) | null;
+  setFavorite: (favorite: Favorite & { category: Category }) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -17,5 +21,9 @@ export const useStore = create<StoreState>((set) => ({
   openSidebar: true,
   toggleSidebar: (open) => set({ openSidebar: open }),
   ownCategories: [],
-  setOwnCategories: (categories) => set({ ownCategories: categories })
+  setOwnCategories: (categories) => set({ ownCategories: categories }),
+  showFavorite: false,
+  toggleFavorite: () => set((state) => ({ showFavorite: !state.showFavorite })),
+  favorite: null,
+  setFavorite: (favorite) => set({ favorite: favorite })
 }));

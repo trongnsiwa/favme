@@ -53,7 +53,7 @@ function Navbar() {
         <MTNavbar
           className={`bg-fav-200 shadow-lg px-3 right-0 top-0 rounded-none fixed border-none ${
             openSidebar ? "w-[calc(100%-280px)]" : "w-full"
-          } h-[80px] max-w-none`}
+          } h-[80px] max-w-none transition-all ${openSidebar ? "duration-400" : "duration-500"}`}
         >
           <div className="flex items-center justify-between h-full w-full">
             <div className="search-bar-container flex items-center gap-3">

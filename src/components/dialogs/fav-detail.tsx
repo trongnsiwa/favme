@@ -4,7 +4,12 @@ import {
   DialogBody,
   DialogFooter,
   DialogHeader,
+  IconButton,
   Input,
+  Menu,
+  MenuHandler,
+  MenuItem,
+  MenuList,
   Option,
   Select,
   Textarea,
@@ -13,7 +18,7 @@ import {
 import Image from "next/image";
 import React, { useRef } from "react";
 import noImage from "@public/no-image.png";
-import addIcon from "@public/add.png";
+import infoImage from "@public/about.png";
 import { IoAddOutline } from "react-icons/io5";
 import { useStore } from "src/store/store";
 import { useFormik } from "formik";
@@ -24,13 +29,12 @@ import { trpc } from "src/utils/trpc";
 import Loader from "@components/loader";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { useBoolean, useOnClickOutside } from "usehooks-ts";
+import { BiDotsVerticalRounded } from "react-icons/bi";
+import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
+import { VscOpenPreview } from "react-icons/vsc";
 
-type AddNewDialogProps = {
-  open: boolean;
-  handleOpen: () => void;
-};
-
-interface AddNewValues {
+interface EditValues {
   name: string;
   description: string;
   slug: string;
@@ -38,7 +42,15 @@ interface AddNewValues {
   cover: string;
 }
 
-function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
+function FavDetailDialog() {
+  const open = useStore((state) => state.showFavorite);
+  const handleOpen = useStore((state) => state.toggleFavorite);
+  const favorite = useStore((state) => state.favorite);
+
+  const { toggle, setFalse: backToView, value: isEdit } = useBoolean(false);
+  const menuRef = useRef(null);
+  const { setFalse, setTrue, value: outsideMenu } = useBoolean(true);
+
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
@@ -49,18 +61,21 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
       handleOpen();
       router.push(`/category${ownCategories.find((c) => c.id === formik.values.category)?.slug}`);
       toast.success("Create favorite successfully!");
+    },
+    onError: (err) => {
+      toast.error(err.message);
     }
   });
 
-  const initialValues: AddNewValues = {
-    name: "",
-    description: "",
-    slug: "",
-    category: "",
-    cover: ""
+  const initialValues: EditValues = {
+    name: favorite?.name || "",
+    description: favorite?.description || "",
+    slug: favorite?.slug || "",
+    category: favorite?.category.id || "",
+    cover: favorite?.cover || ""
   };
 
-  const addNewSchema = Yup.object().shape({
+  const editSchema = Yup.object().shape({
     name: Yup.string().min(2, "Too short!").max(100, "Too long!").required("Name is required"),
     description: Yup.string()
       .min(5, "Too short!")
@@ -79,41 +94,105 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
       )
   });
 
-  const handleSubmit = (values: AddNewValues) => {
+  const handleSubmit = (values: EditValues) => {
     mutate(values);
   };
 
   const formik = useFormik({
     initialValues,
-    validationSchema: addNewSchema,
-    onSubmit: handleSubmit
+    validationSchema: editSchema,
+    onSubmit: handleSubmit,
+    enableReinitialize: true,
+    onReset(values, formikHelpers) {
+      formikHelpers.setValues(initialValues);
+    }
   });
+
+  useOnClickOutside(menuRef, () => setTrue());
 
   return (
     <Dialog
-      open={open}
-      handler={handleOpen}
+      open={open && favorite != null}
+      handler={() => {
+        backToView();
+        handleOpen();
+        formik.resetForm();
+      }}
       animate={{
         mount: { scale: 1, y: 0 },
         unmount: { scale: 0.9, y: -100 }
       }}
       className="p-5"
       size="lg"
+      dismiss={{
+        outsidePointerDown: outsideMenu ? true : false
+      }}
     >
       <form onSubmit={formik.handleSubmit}>
-        <DialogHeader className="!font-bold !text-3xl text-fav-300">
-          <Image
-            src={addIcon}
-            alt="Plus icons created by AB Design - Flaticon"
-            width={45}
-            height={45}
-          />
-          Add New Favourite
+        <DialogHeader className="flex justify-between items-center">
+          <div className="!font-bold !text-3xl text-fav-300 flex items-center gap-1">
+            <Image
+              src={infoImage}
+              alt="Plus icons created by AB Design - Flaticon"
+              width={45}
+              height={45}
+            />
+            {favorite?.name}
+          </div>
+          <Menu placement="bottom-end">
+            <MenuHandler onClick={() => setFalse()} ref={menuRef}>
+              <IconButton className="btn-icon !rounded-full" variant="outlined" size="md">
+                <BiDotsVerticalRounded className="w-8 h-8" />
+              </IconButton>
+            </MenuHandler>
+            <MenuList className="z-[10000]">
+              <MenuItem>
+                <Button
+                  type="button"
+                  variant="text"
+                  className="btn-menu !normal-case !py-2"
+                  ripple={false}
+                  onClick={() => {
+                    toggle();
+                    formik.resetForm();
+                  }}
+                >
+                  {isEdit ? (
+                    <>
+                      <VscOpenPreview className="inline-block w-5 h-5 mr-2" />
+                      View favorite
+                    </>
+                  ) : (
+                    <>
+                      <AiOutlineEdit className="inline-block w-5 h-5 mr-2" />
+                      Edit favorite
+                    </>
+                  )}
+                </Button>
+              </MenuItem>
+              <MenuItem>
+                <Button
+                  type="button"
+                  variant="text"
+                  className="btn-menu !normal-case !py-2"
+                  ripple={false}
+                  onClick={() => {
+                    console.log("first");
+                  }}
+                >
+                  <AiOutlineDelete className="inline-block w-5 h-5 mr-2" />
+                  Delete favorite
+                </Button>
+              </MenuItem>
+            </MenuList>
+          </Menu>
         </DialogHeader>
         <DialogBody className="block max-h-[60vh] overflow-y-auto">
           <Typography
             variant="paragraph"
-            className="font-semibold text-fav-500 mb-2 flex justify-between items-center"
+            className={`font-semibold text-fav-500 mb-2 flex justify-between items-center ${
+              isEdit ? "" : "hidden"
+            }`}
           >
             1. Choose image cover: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
           </Typography>
@@ -139,28 +218,29 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
                 </button>
               </div>
               <span className="text-sm text-center my-3 hidden">Or</span>
-              <Input
-                variant="outlined"
-                size="lg"
-                label="Image link"
-                color="light-green"
-                className="text-base placeholder-transparent focus:placeholder-gray-500 flex-1 w-max"
-                placeholder="https://"
-                name="cover"
-                onChange={formik.handleChange}
-                value={formik.values.cover}
-                error={formik.errors.cover != null && formik.touched.cover != null}
-                success={formik.errors.cover == null && formik.touched.cover != null}
-              />
-              {formik.errors.cover && formik.touched.cover && (
+              <div className={`${isEdit ? "" : "hidden"}`}>
+                <Input
+                  variant="outlined"
+                  size="lg"
+                  label="Image link"
+                  color="light-green"
+                  className="text-base placeholder-transparent focus:placeholder-gray-500 flex-1 w-max"
+                  placeholder="https://"
+                  name="cover"
+                  onChange={formik.handleChange}
+                  value={formik.values.cover}
+                  error={formik.errors.cover != null && formik.touched.cover != null}
+                  success={formik.errors.cover == null && formik.touched.cover != null}
+                />
+              </div>
+              {isEdit && formik.errors.cover && formik.touched.cover && (
                 <div className="error-msg">{formik.errors.cover}</div>
               )}
             </div>
 
             <div className="border-dashed border-2 border-gray-400 flex flex-col justify-center items-center relative cursor-default">
-              {formik.dirty && formik.errors.cover == null && formik.values.cover != null ? (
-                <img src={formik.values.cover} alt={formik.values.cover} className="object-cover" />
-              ) : (
+              {(isEdit && formik.errors.cover != null) ||
+              (!isEdit && formik.values.cover === "") ? (
                 <>
                   <Image
                     src={noImage}
@@ -173,12 +253,16 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
                     No image selected
                   </span>
                 </>
+              ) : (
+                <img src={formik.values.cover} alt={formik.values.cover} className="object-cover" />
               )}
             </div>
           </div>
           <Typography
             variant="paragraph"
-            className="font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center"
+            className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${
+              isEdit ? "" : "hidden"
+            }`}
           >
             2. Information about favorite: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
           </Typography>
@@ -194,8 +278,9 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
               value={formik.values.name}
               error={formik.errors.name != null && formik.touched.name != null}
               success={formik.errors.name == null && formik.touched.name != null}
+              readOnly={!isEdit}
             />
-            {formik.errors.name && formik.touched.name && (
+            {isEdit && formik.errors.name && formik.touched.name && (
               <div className="error-msg">{formik.errors.name}</div>
             )}
           </div>
@@ -211,8 +296,9 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
               value={formik.values.description}
               error={formik.errors.description != null && formik.touched.description != null}
               success={formik.errors.description == null && formik.touched.description != null}
+              readOnly={!isEdit}
             />
-            {formik.errors.description && formik.touched.description && (
+            {isEdit && formik.errors.description && formik.touched.description && (
               <div className="error-msg">{formik.errors.description}</div>
             )}
           </div>
@@ -229,12 +315,15 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
               value={formik.values.slug}
               error={formik.errors.slug != null && formik.touched.slug != null}
               success={formik.errors.slug == null && formik.touched.slug != null}
+              readOnly={!isEdit}
             />
             <Button
               variant="text"
               color="gray"
               type="button"
-              className="!normal-case text-fav-500 text-sm hover:!bg-fav-100 hover:!text-black !text-center w-1/4"
+              className={`!normal-case text-fav-500 text-sm hover:!bg-fav-100 hover:!text-black !text-center w-1/4 ${
+                isEdit ? "" : "hidden"
+              }`}
               onClick={() =>
                 formik.setFieldValue(
                   "slug",
@@ -245,15 +334,18 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
               Generate
             </Button>
           </div>
-          {formik.errors.slug && formik.touched.slug && (
+          {isEdit && formik.errors.slug && formik.touched.slug && (
             <div className="error-msg">{formik.errors.slug}</div>
           )}
           <Typography
             variant="paragraph"
-            className="font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center"
+            className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${
+              isEdit ? "" : "hidden"
+            }`}
           >
             3. Choose category: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
           </Typography>
+          <div className={`${isEdit ? "" : "mt-3"}`}></div>
           <Select
             label="Select Category"
             animate={{
@@ -265,6 +357,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
             value={formik.values.category}
             error={formik.errors.category != null && formik.touched.category != null}
             success={formik.errors.category == null && formik.touched.category != null}
+            disabled={!isEdit}
           >
             {ownCategories.map((category) => (
               <Option key={category.id} value={category.id}>
@@ -272,7 +365,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
               </Option>
             ))}
           </Select>
-          {formik.errors.category && formik.touched.category && (
+          {isEdit && formik.errors.category && formik.touched.category && (
             <div className="error-msg">{formik.errors.category}</div>
           )}
         </DialogBody>
@@ -280,19 +373,21 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
           <Button
             variant="text"
             color="gray"
-            onClick={() => formik.resetForm}
-            className="mr-1 !normal-case"
+            onClick={() => formik.resetForm()}
+            className={`mr-1 !normal-case ${isEdit ? "" : "hidden"}`}
             size="lg"
           >
             <span>Reset</span>
           </Button>
           <Button
-            className="!normal-case btn-add !bg-fav-200 hover:!bg-fav-300 hover:!text-white"
+            className={`!normal-case btn-add !bg-fav-200 hover:!bg-fav-300 hover:!text-white ${
+              isEdit ? "" : "hidden"
+            }`}
             type="submit"
             disabled={formik.isSubmitting || isLoading}
           >
-            {isLoading ? <Loader /> : <IoAddOutline className="w-6 h-6 mr-1" />}
-            <span>Add Fav</span>
+            {isLoading ? <Loader /> : <AiOutlineEdit className="w-6 h-6 mr-1" />}
+            <span>Edit Fav</span>
           </Button>
         </DialogFooter>
       </form>
@@ -300,4 +395,4 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
   );
 }
 
-export default AddNewDialog;
+export default FavDetailDialog;

@@ -1,3 +1,4 @@
+import { FavoriteStatus } from "@prisma/client";
 import z from "zod";
 
 export const createFavoriteSchema = z.object({
@@ -21,3 +22,10 @@ export const getFavoriteByCategorySchemma = z.object({
 });
 
 export type GetFavoriteByCategoryInput = z.TypeOf<typeof getFavoriteByCategorySchemma>;
+
+export const changeStatusSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum([FavoriteStatus.UNFAVORED, FavoriteStatus.FAVORED])
+});
+
+export type ChangeStatusInput = z.TypeOf<typeof changeStatusSchema>;
