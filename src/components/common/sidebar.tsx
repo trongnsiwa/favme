@@ -63,15 +63,13 @@ function Sidebar() {
                 data.map((category, index) => (
                   <li
                     className={`mb-2 text-white ${
-                      router.pathname.length > 1 &&
-                      router.pathname.startsWith(category.slug) &&
-                      category.slug.length > 1
+                      router.asPath === `/category${category.slug}`
                         ? `font-bold bg-fav-500 rounded-lg`
                         : `hover:bg-fav-500 hover:rounded-lg hover:font-bold`
                     }`}
                     key={`category_${index}`}
                   >
-                    <Link href={category.slug}>
+                    <Link href={`/category${category.slug}`}>
                       <div className={`flex items-center m-4 cursor-pointer gap-3`}>
                         <DynamicFaIcon
                           name={category.cover as keyof typeof Icons}

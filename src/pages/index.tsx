@@ -1,15 +1,17 @@
 import { useCallback, useEffect } from "react";
-import { Button } from "@material-tailwind/react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { setCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
 import { trpc } from "src/utils/trpc";
 import { defaultCategories } from "src/schemas/category.schema";
+import { useStore } from "src/store/store";
 
 const Home = ({ pageVisited }: { pageVisited: boolean }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  const ownCategories = useStore((state) => state.ownCategories);
 
   if (status === "unauthenticated") {
     router.replace("/login");
@@ -28,10 +30,14 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
   }, []);
 
   useEffect(() => {
-    if (!pageVisited && session?.user) {
-      generateDefaultCategories();
+    if (ownCategories.length !== 0 && ownCategories[0]) {
+      router.replace(`/category${ownCategories[0].slug}`);
+    } else {
+      if (!pageVisited && session?.user) {
+        generateDefaultCategories();
+      }
     }
-  }, []);
+  }, [ownCategories]);
 
   return <></>;
 };
