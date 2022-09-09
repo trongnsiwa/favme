@@ -63,6 +63,10 @@
   .search-bar-container label {
     @apply !hidden;
   }
+
+  .error-msg {
+    @apply text-red-600 text-sm font-medium mt-2 mb-5;
+  }
 }
 
 .spinner {

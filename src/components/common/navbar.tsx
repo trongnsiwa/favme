@@ -33,9 +33,7 @@ function Navbar() {
 
   const logOut = () => {
     signOut();
-
     router.replace("/login");
-    router.reload();
   };
 
   useOnClickOutside(menuRef, setFalse);
@@ -102,6 +100,7 @@ function Navbar() {
                   <MenuItem className="menu-item">
                     <Button
                       variant="text"
+                      type="button"
                       onClick={logOut}
                       className="btn-menu !normal-case"
                       ripple={false}

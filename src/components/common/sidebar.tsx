@@ -14,11 +14,15 @@ function Sidebar() {
   const router = useRouter();
 
   const openSidebar = useStore((state) => state.openSidebar);
+  const setOwnCategories = useStore((state) => state.setOwnCategories);
 
   const { data, isLoading } = trpc.useQuery(["categories.categories"], {
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      setOwnCategories(data);
+    }
   });
 
   return (

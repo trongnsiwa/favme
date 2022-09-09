@@ -32,7 +32,7 @@ export const categoryRouter = createRouter()
           if (e.code === "P2002") {
             throw new trpc.TRPCError({
               code: "CONFLICT",
-              message: "User already exists"
+              message: "Category already exists"
             });
           }
         }

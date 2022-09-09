@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import "../styles/globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { ThemeProvider } from "@material-tailwind/react";
 import Head from "next/head";
 import ScreenLoading from "@components/screen-loading";
@@ -13,11 +14,12 @@ import NextNProgress from "nextjs-progressbar";
 import { useRouter } from "next/router";
 import Layout from "@components/layouts/layout";
 import { AppRouter } from "@server/router/route/app.route";
+import { ToastContainer } from "react-toastify";
 
 const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
-  if (["/login", "sign-up"].indexOf(router.pathname) > -1) {
+  if (["/login", "/sign-up"].indexOf(router.pathname) > -1) {
     return <>{children}</>;
   }
 
@@ -42,6 +44,22 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
           </GlobalLayout>
         </ThemeProvider>
       </SessionProvider>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={700}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        closeButton={false}
+        style={{
+          zIndex: 999
+        }}
+      />
     </>
   );
 };
