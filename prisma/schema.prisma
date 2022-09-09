@@ -79,6 +79,7 @@ model Favorite {
     description String
     slug        String @unique
     cover       String
+    link        String
 
     createdAt  DateTime       @default(now())
     updatedAt  DateTime       @updatedAt

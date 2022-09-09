@@ -53,7 +53,11 @@
   }
 
   .btn-add {
-    @apply hover:!bg-fav-400 !bg-fav-600 !text-base !text-white active:!bg-fav-400 flex items-center hover:!text-fav-100 shadow-fav-200/20 hover:!shadow-fav-200/80;
+    @apply hover:!bg-fav-400 !bg-fav-600 !text-base !text-white active:!bg-fav-400 flex items-center shadow-fav-200/20 hover:!shadow-fav-200/80;
+  }
+
+  .btn-del {
+    @apply hover:!bg-red-400 !bg-red-600 !text-base !text-white active:!bg-red-400 flex items-center shadow-red-200/20 hover:!shadow-red-200/80;
   }
 
   .search-bar {

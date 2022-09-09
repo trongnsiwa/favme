@@ -2,6 +2,8 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import {
   changeStatusSchema,
   createFavoriteSchema,
+  deleteFavoriteSchema,
+  editFavoriteSchema,
   getFavoriteByCategorySchemma
 } from "./../../../schemas/favorite.schema";
 import { createRouter } from "../createRouter";
@@ -19,7 +21,7 @@ export const favoriteRouter = createRouter()
       }
 
       try {
-        const category = await ctx.prisma.favorite.create({
+        const favorite = await ctx.prisma.favorite.create({
           data: {
             ...input,
             creator: {
@@ -35,7 +37,7 @@ export const favoriteRouter = createRouter()
           }
         });
 
-        return category;
+        return favorite;
       } catch (e) {
         if (e instanceof PrismaClientKnownRequestError) {
           if (e.code === "P2002") {
@@ -86,7 +88,7 @@ export const favoriteRouter = createRouter()
   .mutation("change-status", {
     input: changeStatusSchema,
     async resolve({ ctx, input }) {
-      const category = await ctx.prisma.favorite.update({
+      const favorite = await ctx.prisma.favorite.update({
         where: {
           id: input.id
         },
@@ -95,6 +97,57 @@ export const favoriteRouter = createRouter()
         }
       });
 
-      return category;
+      return favorite;
+    }
+  })
+  .mutation("edit-favorite", {
+    input: editFavoriteSchema,
+    async resolve({ ctx, input }) {
+      try {
+        const favorite = await ctx.prisma.favorite.update({
+          where: {
+            id: input.id
+          },
+          data: {
+            name: input.name,
+            description: input.description,
+            slug: input.slug,
+            cover: input.cover,
+            category: {
+              connect: {
+                id: input.category
+              }
+            }
+          }
+        });
+
+        return favorite;
+      } catch (e) {
+        if (e instanceof PrismaClientKnownRequestError) {
+          if (e.code === "P2002") {
+            throw new trpc.TRPCError({
+              code: "CONFLICT",
+              message: "Favorite already exists"
+            });
+          }
+        }
+
+        throw new trpc.TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong"
+        });
+      }
+    }
+  })
+  .mutation("delete-favorite", {
+    input: deleteFavoriteSchema,
+    async resolve({ ctx, input }) {
+      const favorite = await ctx.prisma.favorite.delete({
+        where: {
+          id: input.id
+        }
+      });
+
+      return favorite;
     }
   });

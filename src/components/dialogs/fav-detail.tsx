@@ -11,6 +11,9 @@ import {
   MenuItem,
   MenuList,
   Option,
+  Popover,
+  PopoverContent,
+  PopoverHandler,
   Select,
   Textarea,
   Typography
@@ -46,6 +49,7 @@ function FavDetailDialog() {
   const open = useStore((state) => state.showFavorite);
   const handleOpen = useStore((state) => state.toggleFavorite);
   const favorite = useStore((state) => state.favorite);
+  const refetchFavorites = useStore((state) => state.refetchFavorites);
 
   const { toggle, setFalse: backToView, value: isEdit } = useBoolean(false);
   const menuRef = useRef(null);
@@ -55,17 +59,35 @@ function FavDetailDialog() {
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
 
-  const { mutate, isLoading } = trpc.useMutation(["favorites.create-favorite"], {
+  const { mutate, isLoading } = trpc.useMutation(["favorites.edit-favorite"], {
     onSuccess: () => {
       formik.resetForm();
+      setFalse();
+      backToView();
       handleOpen();
       router.push(`/category${ownCategories.find((c) => c.id === formik.values.category)?.slug}`);
-      toast.success("Create favorite successfully!");
+      refetchFavorites();
+      toast.success("Edit favorite successfully!");
     },
     onError: (err) => {
       toast.error(err.message);
     }
   });
+
+  const { mutate: mutateDel, isLoading: loadingDel } = trpc.useMutation(
+    ["favorites.delete-favorite"],
+    {
+      onSuccess: () => {
+        formik.resetForm();
+        handleOpen();
+        refetchFavorites();
+        toast.success("Delete favorite successfully!");
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      }
+    }
+  );
 
   const initialValues: EditValues = {
     name: favorite?.name || "",
@@ -95,7 +117,12 @@ function FavDetailDialog() {
   });
 
   const handleSubmit = (values: EditValues) => {
-    mutate(values);
+    if (!favorite) return;
+    mutate({ id: favorite.id, ...values });
+  };
+
+  const handleDelete = (values: { id: string }) => {
+    mutateDel(values);
   };
 
   const formik = useFormik({
@@ -139,7 +166,7 @@ function FavDetailDialog() {
             />
             {favorite?.name}
           </div>
-          <Menu placement="bottom-end">
+          <Menu placement="bottom-end" open={!outsideMenu}>
             <MenuHandler onClick={() => setFalse()} ref={menuRef}>
               <IconButton className="btn-icon !rounded-full" variant="outlined" size="md">
                 <BiDotsVerticalRounded className="w-8 h-8" />
@@ -150,7 +177,7 @@ function FavDetailDialog() {
                 <Button
                   type="button"
                   variant="text"
-                  className="btn-menu !normal-case !py-2"
+                  className="btn-menu !normal-case !py-2 flex items-center"
                   ripple={false}
                   onClick={() => {
                     toggle();
@@ -170,20 +197,34 @@ function FavDetailDialog() {
                   )}
                 </Button>
               </MenuItem>
-              <MenuItem>
-                <Button
-                  type="button"
-                  variant="text"
-                  className="btn-menu !normal-case !py-2"
-                  ripple={false}
-                  onClick={() => {
-                    console.log("first");
-                  }}
-                >
-                  <AiOutlineDelete className="inline-block w-5 h-5 mr-2" />
-                  Delete favorite
-                </Button>
-              </MenuItem>
+              <Menu placement="right-start" offset={15}>
+                <MenuHandler>
+                  <MenuItem className="!p-0">
+                    <Button
+                      type="button"
+                      variant="text"
+                      color="red"
+                      className="!normal-case !py-3 !px-3 flex items-center !text-sm"
+                      ripple={false}
+                    >
+                      <AiOutlineDelete className="inline-block w-5 h-5 mr-2" />
+                      Delete favorite
+                    </Button>
+                  </MenuItem>
+                </MenuHandler>
+                <MenuList className="z-[10000]">
+                  <MenuItem className="!p-0">
+                    <Button
+                      className={`!normal-case btn-del !text-sm flex items-center`}
+                      onClick={() => handleDelete({ id: favorite!.id })}
+                      disabled={loadingDel}
+                    >
+                      {loadingDel ? <Loader /> : <AiOutlineDelete className="w-5 h-5 mr-2" />}
+                      <span>Confirm Delete</span>
+                    </Button>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </MenuList>
           </Menu>
         </DialogHeader>
@@ -239,8 +280,13 @@ function FavDetailDialog() {
             </div>
 
             <div className="border-dashed border-2 border-gray-400 flex flex-col justify-center items-center relative cursor-default">
-              {(isEdit && formik.errors.cover != null) ||
-              (!isEdit && formik.values.cover === "") ? (
+              {(isEdit && formik.errors.cover == null) || formik.values.cover != null ? (
+                <img
+                  src={formik.values.cover}
+                  alt={formik.values.cover}
+                  className="object-cover h-full xl:h-96"
+                />
+              ) : (
                 <>
                   <Image
                     src={noImage}
@@ -253,8 +299,6 @@ function FavDetailDialog() {
                     No image selected
                   </span>
                 </>
-              ) : (
-                <img src={formik.values.cover} alt={formik.values.cover} className="object-cover" />
               )}
             </div>
           </div>

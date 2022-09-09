@@ -4,7 +4,6 @@ import { AiFillStar } from "react-icons/ai";
 import { DynamicFaIcon } from "./dynamic-icon";
 import * as Icons from "react-icons/fa";
 import { Category, Favorite, FavoriteStatus } from "@prisma/client";
-import { useRouter } from "next/router";
 import { trpc } from "src/utils/trpc";
 import { toast } from "react-toastify";
 import Loader from "./loader";
@@ -39,38 +38,41 @@ function FavCard({ favorite, refetch }: FavCardProps) {
   };
 
   return (
-    <Card className="w-96 hover:shadow-lg hover:shadow-fav-200">
-      <CardBody>
-        <img
-          src={favorite.cover}
-          alt={favorite.name}
-          className="h-full w-full rounded-xl cursor-pointer hover:opacity-90"
-          onClick={() => {
-            setFavorite(favorite);
-            toggleFavorite();
-          }}
-        />
-        <Typography variant="h4" className="mt-5">
-          {favorite.name}
-        </Typography>
-        <Typography className="mt-2 font-normal line-clamp-3 overflow-ellipsis">
-          {favorite.description}
-        </Typography>
-        <Chip
-          value={favorite.category.name}
-          className={`mt-2 !normal-case text-sm bg-fav-500 text-white rounded-full !py-1.5 !pr-3 !pl-5`}
-          icon={
-            <DynamicFaIcon
-              name={favorite.category.cover as keyof typeof Icons}
-              color={favorite.category.color}
-              size={18}
-              className="ml-2"
-            />
-          }
-        />
-        <div className="mt-3 flex justify-end">
+    <Card className="w-[22rem] hover:shadow-lg hover:shadow-fav-200">
+      <CardBody className="flex flex-col justify-between h-full">
+        <div>
+          <img
+            src={favorite.cover}
+            alt={favorite.name}
+            className="h-48 w-full rounded-xl cursor-pointer hover:opacity-90 object-cover"
+            onClick={() => {
+              setFavorite(favorite);
+              toggleFavorite();
+            }}
+          />
+          <Typography variant="h4" className="mt-5">
+            {favorite.name}
+          </Typography>
+          <Typography className="mt-2 font-normal line-clamp-3 overflow-ellipsis">
+            {favorite.description}
+          </Typography>
+          <Chip
+            value={favorite.category.name}
+            className={`mt-2 !normal-case text-sm bg-fav-500 text-white rounded-full !py-1.5 !pr-3 !pl-5`}
+            icon={
+              <DynamicFaIcon
+                name={favorite.category.cover as keyof typeof Icons}
+                color={favorite.category.color}
+                size={18}
+                className="ml-2"
+              />
+            }
+          />
+        </div>
+
+        <div className="flex justify-end">
           {isLoading ? (
-            <Loader size={30} inButton={false} />
+            <Loader size={45} inButton={false} />
           ) : (
             <>
               {favorite.status === "UNFAVORED" ? (

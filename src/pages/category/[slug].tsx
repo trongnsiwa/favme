@@ -7,14 +7,17 @@ import { useInView } from "react-intersection-observer";
 import { trpc } from "src/utils/trpc";
 import noFoundImage from "@public/bookmark.png";
 import Image from "next/image";
+import { useStore } from "src/store/store";
 
 function CategoryPage() {
   const router = useRouter();
   const { slug } = router.query;
 
+  const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
+
   const { ref, inView } = useInView();
 
-  const { data, fetchNextPage, hasNextPage, refetch, isLoading, status } = trpc.useInfiniteQuery(
+  const { data, fetchNextPage, hasNextPage, refetch, isLoading } = trpc.useInfiniteQuery(
     [
       "favorites.get-favorites",
       {
@@ -33,14 +36,21 @@ function CategoryPage() {
     }
   }, [inView]);
 
+  useEffect(() => {
+    setRefetchFavorites(refetch);
+  }, []);
+
   return (
     <>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-7">
         {data &&
-          data.pages.map((page) => (
-            <div key={page.nextCursor ?? "lastPage"}>
+          data.pages.map((page, index) => (
+            <div
+              key={page?.nextCursor?.toString().concat(index.toString()) ?? "lastPage"}
+              className="flex flex-wrap gap-7"
+            >
               {page.favorites.map((favorite) => (
-                <FavCard key={favorite.categoryId} favorite={favorite} refetch={refetch} />
+                <FavCard key={favorite.id} favorite={favorite} refetch={refetch} />
               ))}
             </div>
           ))}

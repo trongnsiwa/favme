@@ -42,12 +42,14 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
+  const refetchFavorites = useStore((state) => state.refetchFavorites);
 
   const { mutate, isLoading } = trpc.useMutation(["favorites.create-favorite"], {
     onSuccess: () => {
       formik.resetForm();
       handleOpen();
       router.push(`/category${ownCategories.find((c) => c.id === formik.values.category)?.slug}`);
+      refetchFavorites();
       toast.success("Create favorite successfully!");
     },
     onError: (err) => {

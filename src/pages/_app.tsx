@@ -57,7 +57,7 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
         pauseOnHover
         closeButton={false}
         style={{
-          zIndex: 999
+          zIndex: 100000
         }}
       />
     </>
