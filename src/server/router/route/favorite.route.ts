@@ -113,6 +113,7 @@ export const favoriteRouter = createRouter()
             description: input.description,
             slug: input.slug,
             cover: input.cover,
+            link: input.link,
             category: {
               connect: {
                 id: input.category

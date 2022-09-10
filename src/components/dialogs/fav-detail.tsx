@@ -11,9 +11,6 @@ import {
   MenuItem,
   MenuList,
   Option,
-  Popover,
-  PopoverContent,
-  PopoverHandler,
   Select,
   Textarea,
   Typography
@@ -22,7 +19,6 @@ import Image from "next/image";
 import React, { useRef } from "react";
 import noImage from "@public/no-image.png";
 import infoImage from "@public/about.png";
-import { IoAddOutline } from "react-icons/io5";
 import { useStore } from "src/store/store";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -43,6 +39,7 @@ interface EditValues {
   slug: string;
   category: string;
   cover: string;
+  link: string;
 }
 
 function FavDetailDialog() {
@@ -62,7 +59,7 @@ function FavDetailDialog() {
   const { mutate, isLoading } = trpc.useMutation(["favorites.edit-favorite"], {
     onSuccess: () => {
       formik.resetForm();
-      setFalse();
+      setTrue();
       backToView();
       handleOpen();
       router.push(`/category${ownCategories.find((c) => c.id === formik.values.category)?.slug}`);
@@ -94,7 +91,8 @@ function FavDetailDialog() {
     description: favorite?.description || "",
     slug: favorite?.slug || "",
     category: favorite?.category.id || "",
-    cover: favorite?.cover || ""
+    cover: favorite?.cover || "",
+    link: favorite?.link || ""
   };
 
   const editSchema = Yup.object().shape({
@@ -113,7 +111,8 @@ function FavDetailDialog() {
       .required("Cover is required")
       .test("valid-image-url", "Must use valid image URL", (value) =>
         testImage(value!, 1000).then((status) => status === "success")
-      )
+      ),
+    link: Yup.string().required("Link is required").url("Must be a valid URL")
   });
 
   const handleSubmit = (values: EditValues) => {
@@ -381,6 +380,24 @@ function FavDetailDialog() {
           {isEdit && formik.errors.slug && formik.touched.slug && (
             <div className="error-msg">{formik.errors.slug}</div>
           )}
+          <div className="mt-3">
+            <Input
+              variant="outlined"
+              size="lg"
+              label="Link URL"
+              color="light-green"
+              className="text-base"
+              name="link"
+              onChange={formik.handleChange}
+              value={formik.values.link}
+              error={formik.errors.link != null && formik.touched.link != null}
+              success={formik.errors.link == null && formik.touched.link != null}
+              readOnly={!isEdit}
+            />
+            {isEdit && formik.errors.link && formik.touched.link && (
+              <div className="error-msg">{formik.errors.link}</div>
+            )}
+          </div>
           <Typography
             variant="paragraph"
             className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${

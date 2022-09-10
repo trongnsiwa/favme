@@ -10,7 +10,8 @@ export const createFavoriteSchema = z.object({
     .max(30)
     .regex(/^\/[a-z0-9-]+$/),
   cover: z.string().url(),
-  category: z.string().min(1)
+  category: z.string().min(1),
+  link: z.string().url()
 });
 
 export type CreateFavoriteInput = z.TypeOf<typeof createFavoriteSchema>;
@@ -40,7 +41,8 @@ export const editFavoriteSchema = z.object({
     .max(30)
     .regex(/^\/[a-z0-9-]+$/),
   cover: z.string().url(),
-  category: z.string().min(1)
+  category: z.string().min(1),
+  link: z.string().url()
 });
 
 export const deleteFavoriteSchema = z.object({

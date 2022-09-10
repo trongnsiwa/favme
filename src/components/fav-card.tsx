@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardBody, Typography, Chip } from "@material-tailwind/react";
-import { AiFillStar } from "react-icons/ai";
+import { Card, CardBody, Typography, Chip, IconButton, Tooltip } from "@material-tailwind/react";
+import { AiFillStar, AiOutlineLink } from "react-icons/ai";
 import { DynamicFaIcon } from "./dynamic-icon";
 import * as Icons from "react-icons/fa";
 import { Category, Favorite, FavoriteStatus } from "@prisma/client";
@@ -8,6 +8,7 @@ import { trpc } from "src/utils/trpc";
 import { toast } from "react-toastify";
 import Loader from "./loader";
 import { useStore } from "src/store/store";
+import Link from "next/link";
 
 type FavCardProps = { favorite: Favorite & { category: Category }; refetch: () => void };
 
@@ -70,7 +71,23 @@ function FavCard({ favorite, refetch }: FavCardProps) {
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex items-end justify-between">
+          <Tooltip
+            content={favorite?.link}
+            animate={{
+              mount: { scale: 1, y: 0 },
+              unmount: { scale: 0, y: 25 }
+            }}
+          >
+            <IconButton
+              className="btn-icon !rounded-full hover:!text-fav-200 hover:!border-fav-200"
+              variant="outlined"
+              size="md"
+              onClick={() => window.open(favorite.link, "_blank")}
+            >
+              <AiOutlineLink className="w-8 h-8" />
+            </IconButton>
+          </Tooltip>
           {isLoading ? (
             <Loader size={45} inButton={false} />
           ) : (
