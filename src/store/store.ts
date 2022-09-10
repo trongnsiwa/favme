@@ -15,6 +15,8 @@ interface StoreState {
   setFavorite: (favorite: Favorite & { category: Category }) => void;
   refetchFavorites: any;
   setRefetchFavorites: (refetch: any) => void;
+  manageCategory: boolean;
+  toggleManageCategory: (open: boolean) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -29,5 +31,7 @@ export const useStore = create<StoreState>((set) => ({
   favorite: null,
   setFavorite: (favorite) => set({ favorite: favorite }),
   refetchFavorites: null,
-  setRefetchFavorites: (refetch) => set({ refetchFavorites: refetch })
+  setRefetchFavorites: (refetch) => set({ refetchFavorites: refetch }),
+  manageCategory: false,
+  toggleManageCategory: (open) => set((state) => ({ manageCategory: open }))
 }));

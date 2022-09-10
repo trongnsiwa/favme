@@ -124,3 +124,18 @@ export const defaultCategories: CreateCategoryInput[] = [
     slug: "/markdown"
   }
 ];
+
+export const editCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  slug: z.string(),
+  cover: z.string(),
+  color: z.string()
+});
+
+export type EditCategoryInput = z.TypeOf<typeof editCategorySchema>;
+
+export const deleteCategorySchema = z.object({
+  id: z.string()
+});

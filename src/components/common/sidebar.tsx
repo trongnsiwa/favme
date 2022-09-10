@@ -9,14 +9,29 @@ import { DynamicFaIcon } from "@components/dynamic-icon";
 import * as Icons from "react-icons/fa";
 import { IconButton, Tooltip } from "@material-tailwind/react";
 import { BiCategory } from "react-icons/bi";
+import { useBoolean } from "usehooks-ts";
+import { IoCloseOutline } from "react-icons/io5";
+import { MdPlaylistAdd } from "react-icons/md";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { useState } from "react";
+import { Category } from "@prisma/client";
+import { AiOutlineEye } from "react-icons/ai";
+import AddCategoryDialog from "@components/dialogs/add-category";
+import CategoryDetailDialog from "@components/dialogs/category-detail";
 
 function Sidebar() {
   const router = useRouter();
+  const { setFalse: closeMode, toggle: toggleMode, value: mode } = useBoolean(false);
+  const { toggle: toggleAdd, value: openAdd } = useBoolean(false);
+  const { toggle: toggleDetail, value: openDetail } = useBoolean(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   const openSidebar = useStore((state) => state.openSidebar);
   const setOwnCategories = useStore((state) => state.setOwnCategories);
+  const toggleManageCategory = useStore((state) => state.toggleManageCategory);
 
-  const { data, isLoading } = trpc.useQuery(["categories.categories"], {
+  const { data, isLoading, refetch } = trpc.useQuery(["categories.categories"], {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -24,6 +39,30 @@ function Sidebar() {
       setOwnCategories(data);
     }
   });
+
+  const { mutate: mutateDel, isLoading: loadingDel } = trpc.useMutation(
+    ["categories.delete-category"],
+    {
+      onSuccess: () => {
+        refetch();
+        toast.success("Delete category successfully!");
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      }
+    }
+  );
+
+  const handleDelete = (values: { id: string }) => {
+    mutateDel(values);
+  };
+
+  useEffect(() => {
+    if (mode) {
+      router.push("/category");
+      toggleManageCategory(true);
+    }
+  }, [mode]);
 
   return (
     <AnimatePresence initial={false}>
@@ -62,41 +101,116 @@ function Sidebar() {
               : data &&
                 data.map((category, index) => (
                   <li
-                    className={`mb-2 text-white ${
+                    className={` mb-2 text-white ${
                       router.asPath === `/category${category.slug}`
                         ? `font-bold bg-fav-500 rounded-lg`
                         : `hover:bg-fav-500 hover:rounded-lg hover:font-bold`
-                    }`}
+                    } 
+                    ${mode ? "hover:!text-red-200 hover:!bg-red-200/20 " : ""}
+                    `}
                     key={`category_${index}`}
                   >
-                    <Link href={`/category${category.slug}`}>
-                      <div className={`flex items-center m-4 cursor-pointer gap-3`}>
-                        <DynamicFaIcon
-                          name={category.cover as keyof typeof Icons}
-                          color={category.color}
-                        />
-                        <p>{category.name}</p>
-                      </div>
-                    </Link>
+                    {mode ? (
+                      <>
+                        <div
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            toggleDetail();
+                          }}
+                        >
+                          <div className={`flex items-center m-4 cursor-pointer gap-3`}>
+                            <DynamicFaIcon
+                              name={category.cover as keyof typeof Icons}
+                              color={category.color}
+                            />
+                            <p>{category.name}</p>
+                          </div>
+                          <AiOutlineEye className="w-4 h-4 mr-4" />
+                        </div>
+                      </>
+                    ) : (
+                      <Link href={`/category${category.slug}`}>
+                        <div className={`flex items-center m-4 cursor-pointer gap-3`}>
+                          <DynamicFaIcon
+                            name={category.cover as keyof typeof Icons}
+                            color={category.color}
+                          />
+                          <p>{category.name}</p>
+                        </div>
+                      </Link>
+                    )}
                   </li>
                 ))}
           </ul>
 
+          <AddCategoryDialog open={openAdd} handleOpen={toggleAdd} refetch={refetch} />
+          <CategoryDetailDialog
+            open={openDetail}
+            handleOpen={toggleDetail}
+            refetch={refetch}
+            category={selectedCategory}
+          />
+
           <div className="absolute z-10 bottom-10 left-1/2 -translate-x-1/2">
-            <Tooltip
-              content="Manage Category"
-              animate={{
-                mount: { scale: 1, y: 0 },
-                unmount: { scale: 0, y: 25 }
-              }}
-            >
-              <IconButton
-                size="lg"
-                className="!rounded-full bg-fav-200 !opacity-100 !w-16 !h-16 !max-w-none !max-h-fit shadow-fav-200/20 hover:!shadow-fav-200/40"
+            {mode ? (
+              <div className="flex items-center justify-center gap-3">
+                <Tooltip
+                  content="Close Manage"
+                  animate={{
+                    mount: { scale: 1, y: 0 },
+                    unmount: { scale: 0, y: 25 }
+                  }}
+                >
+                  <IconButton
+                    className="btn-icon !rounded-full !text-white !border-white !opacity-100 !w-16 !h-16 !max-w-none !max-h-fit shadow-fav-200/20 hover:!shadow-fav-200/40 bg-gray-100/20 hover:bg-gray-100/40 hover:scale-105"
+                    variant="outlined"
+                    size="md"
+                    onClick={() => {
+                      closeMode();
+                      router.back();
+                      toggleManageCategory(false);
+                    }}
+                  >
+                    <IoCloseOutline className="w-8 h-8" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
+                  content="Add Category"
+                  animate={{
+                    mount: { scale: 1, y: 0 },
+                    unmount: { scale: 0, y: 25 }
+                  }}
+                >
+                  <IconButton
+                    className="btn-icon !rounded-full !text-white hover:scale-105 !border-transparent  bg-fav-200 !opacity-100 !w-16 !h-16 !max-w-none !max-h-fit shadow-fav-200/20 hover:!shadow-fav-200/40"
+                    variant="outlined"
+                    size="md"
+                    onClick={() => {
+                      toggleAdd();
+                    }}
+                  >
+                    <MdPlaylistAdd className="w-8 h-8" />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            ) : (
+              <Tooltip
+                content="Manage Category"
+                animate={{
+                  mount: { scale: 1, y: 0 },
+                  unmount: { scale: 0, y: 25 }
+                }}
               >
-                <BiCategory className="!w-8 !h-8 text-white" />
-              </IconButton>
-            </Tooltip>
+                <IconButton
+                  size="lg"
+                  className="!rounded-full bg-fav-200 !opacity-100 !w-16 !h-16 !max-w-none !max-h-fit shadow-fav-200/20 hover:!shadow-fav-200/40"
+                  onClick={toggleMode}
+                >
+                  <BiCategory className="!w-8 !h-8 text-white" />
+                </IconButton>
+              </Tooltip>
+            )}
           </div>
         </motion.div>
       )}

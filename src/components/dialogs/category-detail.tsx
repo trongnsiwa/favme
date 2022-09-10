@@ -10,61 +10,53 @@ import {
   MenuHandler,
   MenuItem,
   MenuList,
-  Option,
-  Select,
   Textarea,
   Typography
 } from "@material-tailwind/react";
 import Image from "next/image";
 import React, { useRef } from "react";
-import noImage from "@public/no-image.png";
 import infoImage from "@public/about.png";
-import { useStore } from "src/store/store";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import slugify from "slugify";
-import { testImage } from "src/utils/valid-image";
 import { trpc } from "src/utils/trpc";
 import Loader from "@components/loader";
-import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { VscOpenPreview } from "react-icons/vsc";
+import { Category } from "@prisma/client";
+import { IconPicker } from "react-fa-icon-picker";
+
+type CategoryDetailDialogProps = {
+  open: boolean;
+  handleOpen: () => void;
+  refetch: () => void;
+  category: Category | null;
+};
 
 interface EditValues {
   name: string;
   description: string;
   slug: string;
-  category: string;
   cover: string;
-  link: string;
+  color: string;
 }
 
-function FavDetailDialog() {
-  const open = useStore((state) => state.showFavorite);
-  const handleOpen = useStore((state) => state.toggleFavorite);
-  const favorite = useStore((state) => state.favorite);
-  const refetchFavorites = useStore((state) => state.refetchFavorites);
-
+function CategoryDetailDialog({ open, handleOpen, refetch, category }: CategoryDetailDialogProps) {
   const { toggle, setFalse: backToView, value: isEdit } = useBoolean(false);
   const menuRef = useRef(null);
   const { setFalse, setTrue, value: outsideMenu } = useBoolean(true);
 
-  const router = useRouter();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const ownCategories = useStore((state) => state.ownCategories);
-
-  const { mutate, isLoading } = trpc.useMutation(["favorites.edit-favorite"], {
+  const { mutate, isLoading } = trpc.useMutation(["categories.edit-category"], {
     onSuccess: () => {
       formik.resetForm();
       setTrue();
       backToView();
       handleOpen();
-      router.push(`/category${ownCategories.find((c) => c.id === formik.values.category)?.slug}`);
-      refetchFavorites();
-      toast.success("Edit favorite successfully!");
+      refetch();
+      toast.success("Edit category successfully!");
     },
     onError: (err) => {
       toast.error(err.message);
@@ -72,13 +64,13 @@ function FavDetailDialog() {
   });
 
   const { mutate: mutateDel, isLoading: loadingDel } = trpc.useMutation(
-    ["favorites.delete-favorite"],
+    ["categories.delete-category"],
     {
       onSuccess: () => {
         formik.resetForm();
         handleOpen();
-        refetchFavorites();
-        toast.success("Delete favorite successfully!");
+        refetch();
+        toast.success("Delete category successfully!");
       },
       onError: (err) => {
         toast.error(err.message);
@@ -87,12 +79,11 @@ function FavDetailDialog() {
   );
 
   const initialValues: EditValues = {
-    name: favorite?.name || "",
-    description: favorite?.description || "",
-    slug: favorite?.slug || "",
-    category: favorite?.category.id || "",
-    cover: favorite?.cover || "",
-    link: favorite?.link || ""
+    name: category?.name || "",
+    description: category?.description || "",
+    slug: category?.slug || "",
+    cover: category?.cover || "",
+    color: category?.color || ""
   };
 
   const editSchema = Yup.object().shape({
@@ -106,18 +97,23 @@ function FavDetailDialog() {
       .max(30, "Too long!")
       .required("Slug is required")
       .matches(/^\/[a-z0-9-]+$/, 'Slug must start with "/", lowercase, numbers and dashes only'),
-    category: Yup.string().required("Category is required"),
     cover: Yup.string()
-      .required("Cover is required")
-      .test("valid-image-url", "Must use valid image URL", (value) =>
-        testImage(value!, 1000).then((status) => status === "success")
-      ),
-    link: Yup.string().required("Link is required").url("Must be a valid URL")
+      .required("Icon is required")
+      .test("test-icon", "Invalid icon", (value) => {
+        if (!value) return false;
+        return value.startsWith("Fa");
+      }),
+    color: Yup.string()
+      .required("Color is required")
+      .test("is-valid-color", "Require hex color", (value) => {
+        if (!value) return false;
+        return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/i.test(value);
+      })
   });
 
   const handleSubmit = (values: EditValues) => {
-    if (!favorite) return;
-    mutate({ id: favorite.id, ...values });
+    if (!category) return;
+    mutate({ id: category.id, ...values });
   };
 
   const handleDelete = (values: { id: string }) => {
@@ -138,7 +134,7 @@ function FavDetailDialog() {
 
   return (
     <Dialog
-      open={open && favorite != null}
+      open={open && category != null}
       handler={() => {
         backToView();
         handleOpen();
@@ -163,7 +159,7 @@ function FavDetailDialog() {
               width={45}
               height={45}
             />
-            {favorite?.name}
+            {category?.name}
           </div>
           <Menu placement="bottom-end" open={!outsideMenu}>
             <MenuHandler onClick={() => setFalse()} ref={menuRef}>
@@ -186,12 +182,12 @@ function FavDetailDialog() {
                   {isEdit ? (
                     <>
                       <VscOpenPreview className="inline-block w-5 h-5 mr-2" />
-                      View favorite
+                      View category
                     </>
                   ) : (
                     <>
                       <AiOutlineEdit className="inline-block w-5 h-5 mr-2" />
-                      Edit favorite
+                      Edit category
                     </>
                   )}
                 </Button>
@@ -207,7 +203,7 @@ function FavDetailDialog() {
                       ripple={false}
                     >
                       <AiOutlineDelete className="inline-block w-5 h-5 mr-2" />
-                      Delete favorite
+                      Delete category
                     </Button>
                   </MenuItem>
                 </MenuHandler>
@@ -215,7 +211,7 @@ function FavDetailDialog() {
                   <MenuItem className="!p-0">
                     <Button
                       className={`!normal-case btn-del !text-sm flex items-center`}
-                      onClick={() => handleDelete({ id: favorite!.id })}
+                      onClick={() => handleDelete({ id: category!.id })}
                       disabled={loadingDel}
                     >
                       {loadingDel ? <Loader /> : <AiOutlineDelete className="w-5 h-5 mr-2" />}
@@ -228,86 +224,55 @@ function FavDetailDialog() {
           </Menu>
         </DialogHeader>
         <DialogBody className="block max-h-[60vh] overflow-y-auto">
-          <Typography
-            variant="paragraph"
-            className={`font-semibold text-fav-500 mb-2 flex justify-between items-center ${
-              isEdit ? "" : "hidden"
-            }`}
-          >
-            1. Choose image cover: <span className="text-red-300 text-xs">Required(*)</span>
-          </Typography>
-          <div className="flex flex-col-reverse items-center gap-5 w-full">
-            <div className="flex flex-col justify-center w-full">
-              <div className="border-dashed border-2 border-gray-400 py-12 px-5 flex-col justify-center items-center bg-blue-gray-50 cursor-not-allowed hidden">
-                <p className="font-semibold text-gray-900 flex flex-wrap justify-center text-center">
-                  <span>Drag and drop your image here or</span>
-                </p>
-                <input
-                  type="file"
-                  multiple={false}
-                  className="hidden"
-                  ref={fileRef}
-                  accept="image/*"
-                />
-                <button
-                  className="mt-2 rounded-sm px-3 py-1 bg-gray-200 hover:bg-fav-300 hover:text-white disabled:hover:text-inherit focus:shadow-outline focus:outline-none disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  disabled={true}
-                  onClick={() => fileRef?.current?.click()}
-                >
-                  Upload a file
-                </button>
-              </div>
-              <span className="text-sm text-center my-3 hidden">Or</span>
-              <div className={`${isEdit ? "" : "hidden"}`}>
-                <Input
-                  variant="outlined"
-                  size="lg"
-                  label="Image link"
-                  color="light-green"
-                  className="text-base placeholder-transparent focus:placeholder-gray-500 flex-1 w-max"
-                  placeholder="https://"
-                  name="cover"
-                  onChange={formik.handleChange}
-                  value={formik.values.cover}
-                  error={formik.errors.cover != null && formik.touched.cover != null}
-                  success={formik.errors.cover == null && formik.touched.cover != null}
-                />
-              </div>
-              {isEdit && formik.errors.cover && formik.touched.cover && (
-                <div className="error-msg">{formik.errors.cover}</div>
-              )}
-            </div>
-
-            <div className="border-dashed border-2 border-gray-400 flex flex-col justify-center items-center relative cursor-default">
-              {(isEdit && formik.errors.cover == null) || formik.values.cover != null ? (
-                <img
-                  src={formik.values.cover}
-                  alt={formik.values.cover}
-                  className="object-cover h-full xl:h-96"
-                />
-              ) : (
-                <>
-                  <Image
-                    src={noImage}
-                    alt="No Image Selected"
-                    objectFit="cover"
-                    width={300}
-                    height={300}
-                  />
-                  <span className="text-gray-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hover:opacity-80">
-                    No image selected
-                  </span>
-                </>
-              )}
-            </div>
+          <div className="flex items-start gap-5">
+            <Typography
+              variant="paragraph"
+              className={`${
+                isEdit ? "font-semibold" : "font-normal text-sm"
+              } text-fav-500 mb-2 flex justify-between items-center`}
+            >
+              {isEdit ? "1. Choose icon:" : "Icon:"}
+            </Typography>
+            <IconPicker
+              value={formik.values.cover}
+              onChange={(value: any) => formik.setFieldValue("cover", value)}
+              containerStyles={{
+                width: "20rem",
+                zIndex: 10000,
+                position: "absolute",
+                display: isEdit ? "absolute" : "hidden"
+              }}
+              buttonStyles={{
+                border:
+                  isEdit && formik.errors.cover && formik.touched.cover
+                    ? "1px solid #E53935"
+                    : "1px solid #B0BEC5",
+                pointerEvents: isEdit ? "auto" : "none"
+              }}
+              buttonIconStyles={{
+                color: "#383838"
+              }}
+              pickerIconStyles={{
+                color: "#383838"
+              }}
+              searchInputStyles={{
+                marginBottom: "0.5rem",
+                padding: "0.5rem"
+              }}
+            />
           </div>
+
+          {isEdit && formik.errors.cover && formik.touched.cover && (
+            <div className="error-msg">{formik.errors.cover}</div>
+          )}
+
           <Typography
             variant="paragraph"
             className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${
               isEdit ? "" : "hidden"
             }`}
           >
-            2. Information about favorite: <span className="text-red-300 text-xs">Required(*)</span>
+            2. Information about category: <span className="text-red-300 text-xs">Required(*)</span>
           </Typography>
           <div className="mt-3">
             <Input
@@ -352,7 +317,7 @@ function FavDetailDialog() {
               label="Slug"
               color="light-green"
               className="text-base placeholder-transparent focus:placeholder-gray-500 flex-1 w-max"
-              placeholder="/your-fav"
+              placeholder="/your-category"
               name="slug"
               onChange={formik.handleChange}
               value={formik.values.slug}
@@ -384,51 +349,20 @@ function FavDetailDialog() {
             <Input
               variant="outlined"
               size="lg"
-              label="Link URL"
+              label="Color"
               color="light-green"
               className="text-base"
-              name="link"
+              name="color"
               onChange={formik.handleChange}
-              value={formik.values.link}
-              error={formik.errors.link != null && formik.touched.link != null}
-              success={formik.errors.link == null && formik.touched.link != null}
+              value={formik.values.color}
+              error={formik.errors.color != null && formik.touched.color != null}
+              success={formik.errors.color == null && formik.touched.color != null}
               readOnly={!isEdit}
             />
-            {isEdit && formik.errors.link && formik.touched.link && (
-              <div className="error-msg">{formik.errors.link}</div>
+            {isEdit && formik.errors.color && formik.touched.color && (
+              <div className="error-msg">{formik.errors.color}</div>
             )}
           </div>
-          <Typography
-            variant="paragraph"
-            className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${
-              isEdit ? "" : "hidden"
-            }`}
-          >
-            3. Choose category: <span className="text-red-300 text-xs">Required(*)</span>
-          </Typography>
-          <div className={`${isEdit ? "" : "mt-3"}`}></div>
-          <Select
-            label="Select Category"
-            animate={{
-              mount: { y: 0 },
-              unmount: { y: 25 }
-            }}
-            color="light-green"
-            onChange={(value) => formik.setFieldValue("category", value)}
-            value={formik.values.category}
-            error={formik.errors.category != null && formik.touched.category != null}
-            success={formik.errors.category == null && formik.touched.category != null}
-            disabled={!isEdit}
-          >
-            {ownCategories.map((category) => (
-              <Option key={category.id} value={category.id}>
-                {category.name}
-              </Option>
-            ))}
-          </Select>
-          {isEdit && formik.errors.category && formik.touched.category && (
-            <div className="error-msg">{formik.errors.category}</div>
-          )}
         </DialogBody>
         <DialogFooter>
           <Button
@@ -448,7 +382,7 @@ function FavDetailDialog() {
             disabled={formik.isSubmitting || isLoading}
           >
             {isLoading ? <Loader /> : <AiOutlineEdit className="w-6 h-6 mr-1" />}
-            <span>Edit Fav</span>
+            <span>Edit Category</span>
           </Button>
         </DialogFooter>
       </form>
@@ -456,4 +390,4 @@ function FavDetailDialog() {
   );
 }
 
-export default FavDetailDialog;
+export default CategoryDetailDialog;

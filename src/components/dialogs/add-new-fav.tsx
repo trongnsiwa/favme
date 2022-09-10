@@ -123,7 +123,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
             variant="paragraph"
             className="font-semibold text-fav-500 mb-2 flex justify-between items-center"
           >
-            1. Choose image cover: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
+            1. Choose image cover: <span className="text-red-300 text-xs">Required(*)</span>
           </Typography>
           <div className="flex flex-col-reverse items-center gap-5 w-full">
             <div className="flex flex-col justify-center w-full">
@@ -188,7 +188,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
             variant="paragraph"
             className="font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center"
           >
-            2. Information about favorite: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
+            2. Information about favorite: <span className="text-red-300 text-xs">Required(*)</span>
           </Typography>
           <div className="mt-3">
             <Input
@@ -277,7 +277,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
             variant="paragraph"
             className="font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center"
           >
-            3. Choose category: <span className="text-red-300 text-xs">Bắt buộc(*)</span>
+            3. Choose category: <span className="text-red-300 text-xs">Required(*)</span>
           </Typography>
           <Select
             label="Select Category"

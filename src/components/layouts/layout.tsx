@@ -11,6 +11,8 @@ type LayoutProps = { children: React.ReactNode };
 
 function Layout({ children }: LayoutProps) {
   const openSidebar = useStore((state) => state.openSidebar);
+  const manageCategory = useStore((state) => state.manageCategory);
+
   const { toggle, value: isAdd } = useBoolean(false);
 
   return (
@@ -21,6 +23,11 @@ function Layout({ children }: LayoutProps) {
     >
       <Sidebar />
       <Navbar />
+      <div
+        className={`${
+          manageCategory ? "h-screen w-[calc(100vw-280px)] fixed bg-black/50 z-50" : ""
+        }`}
+      ></div>
       <main
         className={`bg-fav-400 overflow-auto h-[calc(100%-80px)] ${
           openSidebar ? "w-[calc(100vw-280px)]" : "w-full"
