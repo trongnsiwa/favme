@@ -1,30 +1,26 @@
-import FavCard from "@components/fav-card";
 import Loader from "@components/loader";
 import { Typography } from "@material-tailwind/react";
-import { useRouter } from "next/router";
+import Image from "next/image";
 import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { trpc } from "src/utils/trpc";
 import noFoundImage from "@public/bookmark.png";
-import Image from "next/image";
+import FavCard from "@components/fav-card";
 import { useStore } from "src/store/store";
+import { useRouter } from "next/router";
 
-function CategoryPage() {
-  const router = useRouter();
-  const { slug, searchBy, status, orderBy } = router.query;
-
-  const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
-
+function FavoritePage() {
   const { ref, inView } = useInView();
+  const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
+  const router = useRouter();
+  const { searchBy, orderBy } = router.query;
 
   const { data, fetchNextPage, hasNextPage, refetch, isLoading } = trpc.useInfiniteQuery(
     [
-      "favorites.get-favorites",
+      "favorites.get-liked-favorites",
       {
-        category: "/" + slug,
         limit: 10,
         searchBy: searchBy as string | undefined,
-        status: status as string | undefined,
         orderBy: orderBy as string | undefined
       }
     ],
@@ -83,4 +79,4 @@ function CategoryPage() {
   );
 }
 
-export default CategoryPage;
+export default FavoritePage;

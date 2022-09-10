@@ -17,6 +17,9 @@ export const createFavoriteSchema = z.object({
 export type CreateFavoriteInput = z.TypeOf<typeof createFavoriteSchema>;
 
 export const getFavoriteByCategorySchemma = z.object({
+  searchBy: z.string().optional(),
+  status: z.string().optional(),
+  orderBy: z.string().optional(),
   category: z.string().min(1),
   cursor: z.number().nullish(),
   limit: z.number().min(1).nullish()
@@ -48,3 +51,12 @@ export const editFavoriteSchema = z.object({
 export const deleteFavoriteSchema = z.object({
   id: z.string()
 });
+
+export const getLikedFavoriteSchemma = z.object({
+  searchBy: z.string().optional(),
+  orderBy: z.string().optional(),
+  cursor: z.number().nullish(),
+  limit: z.number().min(1).nullish()
+});
+
+export type GetLikedFavoriteInput = z.TypeOf<typeof getLikedFavoriteSchemma>;

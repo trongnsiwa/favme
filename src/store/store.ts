@@ -1,7 +1,11 @@
-import { CreateCategoryInput } from "./../schemas/category.schema";
 import create from "zustand";
 import { Category, Favorite } from "@prisma/client";
 
+interface FilterType {
+  searchBy: string;
+  status: string;
+  orderBy: string;
+}
 interface StoreState {
   screenLoading: boolean;
   showScreenLoading: (isLoading: boolean) => void;

@@ -13,15 +13,30 @@ import {
   MenuHandler,
   MenuItem,
   MenuList,
-  Navbar as MTNavbar
+  Navbar as MTNavbar,
+  Option,
+  Popover,
+  PopoverContent,
+  PopoverHandler,
+  Select
 } from "@material-tailwind/react";
 import { RiBarChartHorizontalFill } from "react-icons/ri";
 import { IoLogOutOutline } from "react-icons/io5";
 import { BiSearch } from "react-icons/bi";
-import { MdOutlineBookmarkAdd } from "react-icons/md";
+import { MdBookmarkAdd, MdFilterAlt, MdOutlineBookmarkAdd } from "react-icons/md";
+import Link from "next/link";
+import { useFormik } from "formik";
+import { FavoriteStatus } from "@prisma/client";
+
+interface FilterValues {
+  searchBy: string;
+  status: string;
+  orderBy: string;
+}
 
 function Navbar() {
   const { setFalse, toggle } = useBoolean(false);
+  const { value: openFilter, setFalse: closeFilter, toggle: toggleFilter } = useBoolean(false);
 
   const router = useRouter();
   const menuRef = useRef(null);
@@ -30,6 +45,36 @@ function Navbar() {
   const toggleSidebar = useStore((state) => state.toggleSidebar);
 
   const { data: session } = useSession();
+
+  const initialValues: FilterValues = {
+    searchBy: "",
+    status: "",
+    orderBy: ""
+  };
+
+  const handleSubmit = (values: FilterValues) => {
+    const params = new URLSearchParams();
+    if (values.searchBy !== "") {
+      params.append("searchBy", values.searchBy);
+    }
+    if (values.status !== "") {
+      params.append("status", values.status);
+    }
+    if (values.orderBy !== "") {
+      params.append("orderBy", values.orderBy);
+    }
+    const queryString = params.toString();
+    router.push({
+      pathname: router.asPath.split("?")[0],
+      query: queryString
+    });
+    closeFilter();
+  };
+
+  const formik = useFormik({
+    initialValues,
+    onSubmit: handleSubmit
+  });
 
   const logOut = () => {
     signOut();
@@ -65,19 +110,119 @@ function Navbar() {
               >
                 <RiBarChartHorizontalFill className="w-8 h-8" />
               </IconButton>
-              <Input
-                size="lg"
-                className="search-bar w-[22rem]"
-                label={undefined}
-                labelProps={undefined}
-                icon={<BiSearch size={24} />}
-              />
+              <Popover
+                animate={{
+                  mount: { y: 5 },
+                  unmount: { y: 0 }
+                }}
+                placement="bottom-start"
+                open={openFilter}
+                handler={toggleFilter}
+              >
+                <PopoverHandler>
+                  <Input
+                    size="lg"
+                    className="search-bar w-[22rem]"
+                    label={undefined}
+                    labelProps={undefined}
+                    icon={<BiSearch size={24} onClick={toggleFilter} />}
+                  />
+                </PopoverHandler>
+                <PopoverContent className="w-[30rem] p-5">
+                  <form onSubmit={formik.handleSubmit}>
+                    <Input
+                      variant="standard"
+                      size="lg"
+                      label="Tag"
+                      color="light-green"
+                      className="w-full"
+                      name="searchBy"
+                      icon={<BiSearch size={24} />}
+                      value={formik.values.searchBy}
+                      onChange={formik.handleChange}
+                    />
+                    <div className="flex justify-between items-center mt-7 gap-5">
+                      {router.asPath.includes("category") && (
+                        <Select
+                          label="Status"
+                          animate={{
+                            mount: { y: 0 },
+                            unmount: { y: 25 }
+                          }}
+                          variant="standard"
+                          color="light-green"
+                          value={formik.values.status}
+                          onChange={(value) => formik.setFieldValue("status", value)}
+                        >
+                          <Option value="">Select a status</Option>
+                          <Option value={FavoriteStatus.FAVORED}>Favored</Option>
+                          <Option value={FavoriteStatus.UNFAVORED}>Unfavored</Option>
+                        </Select>
+                      )}
+                      {router.asPath.includes("category") ? (
+                        <Select
+                          label="Order"
+                          animate={{
+                            mount: { y: 0 },
+                            unmount: { y: 25 }
+                          }}
+                          variant="standard"
+                          color="light-green"
+                          value={formik.values.orderBy}
+                          onChange={(value) => formik.setFieldValue("orderBy", value)}
+                        >
+                          <Option value="">Select an order</Option>
+                          <Option value="name_asc">Name A-Z</Option>
+                          <Option value="name_desc">Name Z-A</Option>
+                          <Option value="createdAt_asc">Oldest date</Option>
+                          <Option value="createdAt_desc">Newest date</Option>
+
+                          <Option value="status_asc">Favored</Option>
+                          <Option value="status_desc">Unfavored</Option>
+                        </Select>
+                      ) : (
+                        <Select
+                          label="Order"
+                          animate={{
+                            mount: { y: 0 },
+                            unmount: { y: 25 }
+                          }}
+                          variant="standard"
+                          color="light-green"
+                          value={formik.values.orderBy}
+                          onChange={(value) => formik.setFieldValue("orderBy", value)}
+                        >
+                          <Option value="">Select an order</Option>
+                          <Option value="name_asc">Name A-Z</Option>
+                          <Option value="name_desc">Name Z-A</Option>
+                          <Option value="createdAt_asc">Oldest date</Option>
+                          <Option value="createdAt_desc">Newest date</Option>
+                        </Select>
+                      )}
+                    </div>
+                    <Button type="submit" className="btn btn-fav mt-7 shadow-fav">
+                      <MdFilterAlt className="w-6 h-6 text-gray-900" />
+                      Filter
+                    </Button>
+                  </form>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex items-center gap-5">
-              <Button className="btn-add !normal-case" ripple={false}>
-                <MdOutlineBookmarkAdd className="inline-block w-5 h-5 mr-2" />
-                Favorites
-              </Button>
+              <Link href="/favorite">
+                <Button
+                  className={`btn-add !normal-case ${
+                    router.asPath === "/favorite" ? "!text-fav-200" : ""
+                  }`}
+                >
+                  {router.asPath === "/favorite" ? (
+                    <MdBookmarkAdd className="inline-block w-5 h-5 mr-2" />
+                  ) : (
+                    <MdOutlineBookmarkAdd className="inline-block w-5 h-5 mr-2" />
+                  )}
+                  Favorites
+                </Button>
+              </Link>
               <Menu lockScroll={true}>
                 <MenuHandler>
                   <Button variant="text" onClick={toggle} className="btn-avatar">

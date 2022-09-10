@@ -61,7 +61,7 @@
   }
 
   .search-bar {
-    @apply text-base outline-0 !bg-white !rounded-lg focus:!ring-fav-200 focus:!border-fav-200 placeholder-shown:!border-transparent placeholder-shown:!border-t-0 focus-visible:ring-0;
+    @apply text-base outline-0 !bg-fav-50 !rounded-lg focus:!ring-fav-200 focus:!border-fav-200 placeholder-shown:!border-transparent placeholder-shown:!border-t-0 focus-visible:ring-0 !cursor-pointer !caret-transparent;
   }
 
   .search-bar-container label {

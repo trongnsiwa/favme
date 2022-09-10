@@ -10,7 +10,11 @@ import * as Icons from "react-icons/fa";
 import { IconButton, Tooltip } from "@material-tailwind/react";
 import { BiCategory } from "react-icons/bi";
 import { useBoolean } from "usehooks-ts";
-import { IoCloseOutline } from "react-icons/io5";
+import {
+  IoChevronForwardCircleOutline,
+  IoChevronForwardOutline,
+  IoCloseOutline
+} from "react-icons/io5";
 import { MdPlaylistAdd } from "react-icons/md";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
@@ -106,7 +110,7 @@ function Sidebar() {
                         ? `font-bold bg-fav-500 rounded-lg`
                         : `hover:bg-fav-500 hover:rounded-lg hover:font-bold`
                     } 
-                    ${mode ? "hover:!text-red-200 hover:!bg-red-200/20 " : ""}
+                    ${mode ? "hover:!text-fav-200 hover:!bg-fav-100/20 " : ""}
                     `}
                     key={`category_${index}`}
                   >
@@ -126,7 +130,7 @@ function Sidebar() {
                             />
                             <p>{category.name}</p>
                           </div>
-                          <AiOutlineEye className="w-4 h-4 mr-4" />
+                          <IoChevronForwardOutline className="w-4 h-4 mr-4" />
                         </div>
                       </>
                     ) : (

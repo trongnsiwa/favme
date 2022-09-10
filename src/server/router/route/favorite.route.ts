@@ -4,11 +4,12 @@ import {
   createFavoriteSchema,
   deleteFavoriteSchema,
   editFavoriteSchema,
-  getFavoriteByCategorySchemma
+  getFavoriteByCategorySchemma,
+  getLikedFavoriteSchemma
 } from "./../../../schemas/favorite.schema";
 import { createRouter } from "../createRouter";
 import * as trpc from "@trpc/server";
-
+import { Favorite, FavoriteStatus } from "@prisma/client";
 export const favoriteRouter = createRouter()
   .mutation("create-favorite", {
     input: createFavoriteSchema,
@@ -21,7 +22,7 @@ export const favoriteRouter = createRouter()
       }
 
       try {
-        const favorite = await ctx.prisma.favorite.create({
+        const favorite: Favorite = await ctx.prisma.favorite.create({
           data: {
             ...input,
             creator: {
@@ -65,13 +66,34 @@ export const favoriteRouter = createRouter()
         where: {
           category: {
             slug: input.category
+          },
+          status:
+            input.status && input.status.length > 0 ? (input.status as FavoriteStatus) : undefined,
+          name: {
+            contains: input.searchBy ?? undefined,
+            mode: "insensitive"
           }
         },
         take: limit + 1,
         cursor: cursor ? { id: cursor.toString() } : undefined,
         include: {
           category: true
-        }
+        },
+        orderBy: input.orderBy
+          ? {
+              status: input.orderBy?.startsWith("status")
+                ? (input.orderBy.split("_")[1] as "asc" | "desc")
+                : undefined,
+              name: input.orderBy?.startsWith("name")
+                ? (input.orderBy.split("_")[1] as "asc" | "desc")
+                : undefined,
+              createdAt: input.orderBy?.startsWith("createdAt")
+                ? (input.orderBy.split("_")[1] as "asc" | "desc")
+                : undefined
+            }
+          : {
+              status: "asc"
+            }
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
@@ -150,5 +172,45 @@ export const favoriteRouter = createRouter()
       });
 
       return favorite;
+    }
+  })
+  .query("get-liked-favorites", {
+    input: getLikedFavoriteSchemma,
+    async resolve({ ctx, input }) {
+      const limit = input.limit ?? 50;
+      const { cursor } = input;
+
+      const favorites = await ctx.prisma.favorite.findMany({
+        where: {
+          status: FavoriteStatus.FAVORED,
+          name: {
+            contains: input.searchBy ?? undefined,
+            mode: "insensitive"
+          }
+        },
+        take: limit + 1,
+        cursor: cursor ? { id: cursor.toString() } : undefined,
+        include: {
+          category: true
+        },
+        orderBy: {
+          name: input.orderBy?.startsWith("name")
+            ? (input.orderBy.split("_")[1] as "asc" | "desc")
+            : undefined,
+          createdAt: input.orderBy?.startsWith("createdAt")
+            ? (input.orderBy.split("_")[1] as "asc" | "desc")
+            : undefined
+        }
+      });
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (favorites.length > limit) {
+        const nextItem = favorites.pop();
+        nextCursor = parseInt(nextItem!.id as string, 10);
+      }
+      return {
+        favorites,
+        nextCursor
+      };
     }
   });
