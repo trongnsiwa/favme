@@ -3,14 +3,17 @@ import { Card, CardBody, Typography, Chip, IconButton, Tooltip } from "@material
 import { AiFillStar, AiOutlineLink } from "react-icons/ai";
 import { DynamicFaIcon } from "./dynamic-icon";
 import * as Icons from "react-icons/fa";
-import { Category, Favorite, FavoriteStatus } from "@prisma/client";
+import { Category, Favorite, FavoriteStatus, Label } from "@prisma/client";
 import { trpc } from "src/utils/trpc";
 import { toast } from "react-toastify";
 import Loader from "./loader";
 import { useStore } from "src/store/store";
 import Link from "next/link";
 
-type FavCardProps = { favorite: Favorite & { category: Category }; refetch: () => void };
+type FavCardProps = {
+  favorite: Favorite & { category: Category; labels: Label[] };
+  refetch: () => void;
+};
 
 function FavCard({ favorite, refetch }: FavCardProps) {
   const setFavorite = useStore((state) => state.setFavorite);
@@ -69,6 +72,18 @@ function FavCard({ favorite, refetch }: FavCardProps) {
               />
             }
           />
+          <div className="flex mt-2 flex-wrap gap-1">
+            {favorite.labels.map(
+              (label, index) =>
+                index <= 2 && (
+                  <Chip
+                    key={label.id}
+                    value={label.name}
+                    className={`!normal-case text-xs bg-gray-200 text-gray-700 rounded-full !py-1`}
+                  />
+                )
+            )}
+          </div>
         </div>
 
         <div className="flex items-end justify-between">

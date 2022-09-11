@@ -9,7 +9,7 @@ import {
 } from "./../../../schemas/favorite.schema";
 import { createRouter } from "../createRouter";
 import * as trpc from "@trpc/server";
-import { Favorite, FavoriteStatus } from "@prisma/client";
+import { FavoriteStatus } from "@prisma/client";
 export const favoriteRouter = createRouter()
   .mutation("create-favorite", {
     input: createFavoriteSchema,
@@ -22,7 +22,7 @@ export const favoriteRouter = createRouter()
       }
 
       try {
-        const favorite: Favorite = await ctx.prisma.favorite.create({
+        const favorite = await ctx.prisma.favorite.create({
           data: {
             ...input,
             creator: {
@@ -34,6 +34,21 @@ export const favoriteRouter = createRouter()
               connect: {
                 id: input.category
               }
+            },
+            labels: {
+              connectOrCreate: input.labels.map((label) => ({
+                where: {
+                  name: label
+                },
+                create: {
+                  name: label,
+                  creator: {
+                    connect: {
+                      id: ctx.session?.user?._id
+                    }
+                  }
+                }
+              }))
             }
           }
         });
@@ -69,15 +84,27 @@ export const favoriteRouter = createRouter()
           },
           status:
             input.status && input.status.length > 0 ? (input.status as FavoriteStatus) : undefined,
-          name: {
-            contains: input.searchBy ?? undefined,
-            mode: "insensitive"
-          }
+          name: input.searchBy
+            ? {
+                contains: input.searchBy,
+                mode: "insensitive"
+              }
+            : undefined,
+          labels: input.labels
+            ? {
+                some: {
+                  name: {
+                    in: input.labels
+                  }
+                }
+              }
+            : undefined
         },
         take: limit + 1,
         cursor: cursor ? { id: cursor.toString() } : undefined,
         include: {
-          category: true
+          category: true,
+          labels: true
         },
         orderBy: input.orderBy
           ? {
@@ -140,6 +167,21 @@ export const favoriteRouter = createRouter()
               connect: {
                 id: input.category
               }
+            },
+            labels: {
+              connectOrCreate: input.labels.map((label) => ({
+                where: {
+                  name: label
+                },
+                create: {
+                  name: label,
+                  creator: {
+                    connect: {
+                      id: ctx.session?.user?._id
+                    }
+                  }
+                }
+              }))
             }
           }
         });
@@ -183,15 +225,27 @@ export const favoriteRouter = createRouter()
       const favorites = await ctx.prisma.favorite.findMany({
         where: {
           status: FavoriteStatus.FAVORED,
-          name: {
-            contains: input.searchBy ?? undefined,
-            mode: "insensitive"
-          }
+          name: input.searchBy
+            ? {
+                contains: input.searchBy,
+                mode: "insensitive"
+              }
+            : undefined,
+          labels: input.labels
+            ? {
+                some: {
+                  name: {
+                    in: input.labels
+                  }
+                }
+              }
+            : undefined
         },
         take: limit + 1,
         cursor: cursor ? { id: cursor.toString() } : undefined,
         include: {
-          category: true
+          category: true,
+          labels: true
         },
         orderBy: {
           name: input.orderBy?.startsWith("name")

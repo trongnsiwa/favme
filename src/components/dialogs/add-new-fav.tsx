@@ -11,7 +11,7 @@ import {
   Typography
 } from "@material-tailwind/react";
 import Image from "next/image";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import noImage from "@public/no-image.png";
 import addIcon from "@public/add.png";
 import { IoAddOutline } from "react-icons/io5";
@@ -24,11 +24,18 @@ import { trpc } from "src/utils/trpc";
 import Loader from "@components/loader";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import Creatable from "react-select/creatable";
 
 type AddNewDialogProps = {
   open: boolean;
   handleOpen: () => void;
 };
+
+interface MultiSelectType {
+  value: string;
+  label: string;
+  _isNew?: boolean;
+}
 
 interface AddNewValues {
   name: string;
@@ -37,6 +44,7 @@ interface AddNewValues {
   category: string;
   cover: string;
   link: string;
+  labels: string[];
 }
 
 function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
@@ -44,6 +52,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
   const refetchFavorites = useStore((state) => state.refetchFavorites);
+  const [labels, setLabels] = useState<MultiSelectType[]>([]);
 
   const { mutate, isLoading } = trpc.useMutation(["favorites.create-favorite"], {
     onSuccess: () => {
@@ -58,13 +67,23 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
     }
   });
 
+  const { isLoading: loadingLabels } = trpc.useQuery(["labels.labels"], {
+    onSuccess: (data) => {
+      setLabels(data.map((l) => ({ value: l.name, label: l.name })));
+    },
+    onError: (err) => {
+      setLabels([]);
+    }
+  });
+
   const initialValues: AddNewValues = {
     name: "",
     description: "",
     slug: "",
     category: "",
     cover: "",
-    link: ""
+    link: "",
+    labels: []
   };
 
   const addNewSchema = Yup.object().shape({
@@ -84,7 +103,8 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
       .test("valid-image-url", "Must use valid image URL", (value) =>
         testImage(value!, 1000).then((status) => status === "success")
       ),
-    link: Yup.string().required("Link is required").url("Must be a valid URL")
+    link: Yup.string().required("Link is required").url("Must be a valid URL"),
+    labels: Yup.array().of(Yup.string().min(1, "Too short!").max(30, "Too long!"))
   });
 
   const handleSubmit = (values: AddNewValues) => {
@@ -300,12 +320,49 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
           {formik.errors.category && formik.touched.category && (
             <div className="error-msg">{formik.errors.category}</div>
           )}
+          <Typography
+            variant="paragraph"
+            className="font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center"
+          >
+            4. Choose labels: <span className="text-red-300 text-xs">Required(*)</span>
+          </Typography>
+
+          <Creatable
+            options={labels}
+            isMulti={true}
+            name="labels"
+            value={formik.values.labels.map((label) => ({ value: label, label: label }))}
+            onChange={(newValue: ReadonlyArray<MultiSelectType>) => {
+              console.log(newValue);
+              formik.setFieldValue(
+                "labels",
+                newValue.map((lb) => lb.value)
+              );
+            }}
+            noOptionsMessage={(obj) => <>No Labels</>}
+            isLoading={loadingLabels}
+            styles={{
+              control: (provided, state) => ({
+                ...provided,
+                border: state.isFocused ? "1px solid #89BF4D" : "1px solid #B0BEC5",
+                borderColor: state.isFocused ? "#89BF4D" : " #B0BEC5",
+                boxShadow: state.isFocused ? "#89BF4D" : " #B0BEC5",
+                borderRadius: "0.375rem",
+                ":hover": {
+                  border: "1px solid #89BF4D"
+                },
+                ":focus": {
+                  border: "1px solid #89BF4D"
+                }
+              })
+            }}
+          />
         </DialogBody>
         <DialogFooter>
           <Button
             variant="text"
             color="gray"
-            onClick={() => formik.resetForm}
+            onClick={() => formik.resetForm()}
             className="mr-1 !normal-case"
             size="lg"
           >
@@ -314,7 +371,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
           <Button
             className="!normal-case btn-add !bg-fav-200 hover:!bg-fav-300 hover:!text-white"
             type="submit"
-            disabled={formik.isSubmitting || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? <Loader /> : <IoAddOutline className="w-6 h-6 mr-1" />}
             <span>Add Fav</span>

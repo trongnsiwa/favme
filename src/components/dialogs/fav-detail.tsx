@@ -16,7 +16,7 @@ import {
   Typography
 } from "@material-tailwind/react";
 import Image from "next/image";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import noImage from "@public/no-image.png";
 import infoImage from "@public/about.png";
 import { useStore } from "src/store/store";
@@ -32,6 +32,15 @@ import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { VscOpenPreview } from "react-icons/vsc";
+import { Label } from "@prisma/client";
+import Creatable from "react-select/creatable";
+import { ObjectId } from "bson";
+
+interface MultiSelectType {
+  value: string;
+  label: string;
+  _isNew?: boolean;
+}
 
 interface EditValues {
   name: string;
@@ -40,6 +49,7 @@ interface EditValues {
   category: string;
   cover: string;
   link: string;
+  labels: string[];
 }
 
 function FavDetailDialog() {
@@ -47,6 +57,7 @@ function FavDetailDialog() {
   const handleOpen = useStore((state) => state.toggleFavorite);
   const favorite = useStore((state) => state.favorite);
   const refetchFavorites = useStore((state) => state.refetchFavorites);
+  const [labels, setLabels] = useState<MultiSelectType[]>([]);
 
   const { toggle, setFalse: backToView, value: isEdit } = useBoolean(false);
   const menuRef = useRef(null);
@@ -55,6 +66,15 @@ function FavDetailDialog() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
+
+  const { isLoading: loadingLabels } = trpc.useQuery(["labels.labels"], {
+    onSuccess: (data) => {
+      setLabels(data.map((l) => ({ value: l.name, label: l.name })));
+    },
+    onError: (err) => {
+      setLabels([]);
+    }
+  });
 
   const { mutate, isLoading } = trpc.useMutation(["favorites.edit-favorite"], {
     onSuccess: () => {
@@ -92,7 +112,8 @@ function FavDetailDialog() {
     slug: favorite?.slug || "",
     category: favorite?.category.id || "",
     cover: favorite?.cover || "",
-    link: favorite?.link || ""
+    link: favorite?.link || "",
+    labels: favorite?.labels.map((label) => label.name) || []
   };
 
   const editSchema = Yup.object().shape({
@@ -112,7 +133,8 @@ function FavDetailDialog() {
       .test("valid-image-url", "Must use valid image URL", (value) =>
         testImage(value!, 1000).then((status) => status === "success")
       ),
-    link: Yup.string().required("Link is required").url("Must be a valid URL")
+    link: Yup.string().required("Link is required").url("Must be a valid URL"),
+    labels: Yup.array().of(Yup.string().min(1, "Too short!").max(30, "Too long!"))
   });
 
   const handleSubmit = (values: EditValues) => {
@@ -429,6 +451,46 @@ function FavDetailDialog() {
           {isEdit && formik.errors.category && formik.touched.category && (
             <div className="error-msg">{formik.errors.category}</div>
           )}
+          <div className={`${isEdit ? "" : "mt-3"}`}></div>
+          <Typography
+            variant="paragraph"
+            className={`font-semibold text-fav-500 mb-2 flex justify-between mt-5 items-center ${
+              isEdit ? "" : "hidden"
+            }`}
+          >
+            4. Choose labels: <span className="text-red-300 text-xs">Required(*)</span>
+          </Typography>
+          <Creatable
+            options={labels}
+            isMulti={true}
+            name="labels"
+            value={formik.values.labels.map((label) => ({ value: label, label: label }))}
+            onChange={(newValue: ReadonlyArray<MultiSelectType>) => {
+              console.log(newValue);
+              formik.setFieldValue(
+                "labels",
+                newValue.map((lb) => lb.value)
+              );
+            }}
+            noOptionsMessage={(obj) => <>No Labels</>}
+            isDisabled={!isEdit}
+            isLoading={loadingLabels}
+            styles={{
+              control: (provided, state) => ({
+                ...provided,
+                border: state.isFocused ? "1px solid #89BF4D" : "1px solid #B0BEC5",
+                borderColor: state.isFocused ? "#89BF4D" : " #B0BEC5",
+                boxShadow: state.isFocused ? "#89BF4D" : " #B0BEC5",
+                borderRadius: "0.375rem",
+                ":hover": {
+                  border: "1px solid #89BF4D"
+                },
+                ":focus": {
+                  border: "1px solid #89BF4D"
+                }
+              })
+            }}
+          />
         </DialogBody>
         <DialogFooter>
           <Button
@@ -445,7 +507,7 @@ function FavDetailDialog() {
               isEdit ? "" : "hidden"
             }`}
             type="submit"
-            disabled={formik.isSubmitting || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? <Loader /> : <AiOutlineEdit className="w-6 h-6 mr-1" />}
             <span>Edit Fav</span>

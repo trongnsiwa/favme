@@ -11,7 +11,7 @@ import { useStore } from "src/store/store";
 
 function CategoryPage() {
   const router = useRouter();
-  const { slug, searchBy, status, orderBy } = router.query;
+  const { slug, searchBy, status, orderBy, label } = router.query;
 
   const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
 
@@ -25,11 +25,13 @@ function CategoryPage() {
         limit: 10,
         searchBy: searchBy as string | undefined,
         status: status as string | undefined,
-        orderBy: orderBy as string | undefined
+        orderBy: orderBy as string | undefined,
+        labels: label as string[] | undefined
       }
     ],
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnWindowFocus: false
     }
   );
 

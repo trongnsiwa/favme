@@ -13,7 +13,7 @@ function FavoritePage() {
   const { ref, inView } = useInView();
   const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
   const router = useRouter();
-  const { searchBy, orderBy } = router.query;
+  const { searchBy, orderBy, label } = router.query;
 
   const { data, fetchNextPage, hasNextPage, refetch, isLoading } = trpc.useInfiniteQuery(
     [
@@ -21,7 +21,8 @@ function FavoritePage() {
       {
         limit: 10,
         searchBy: searchBy as string | undefined,
-        orderBy: orderBy as string | undefined
+        orderBy: orderBy as string | undefined,
+        labels: label as string[] | undefined
       }
     ],
     {

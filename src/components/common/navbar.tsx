@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useStore } from "src/store/store";
 import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import {
   Avatar,
   Button,
+  Chip,
   IconButton,
   Input,
   Menu,
@@ -18,20 +19,25 @@ import {
   Popover,
   PopoverContent,
   PopoverHandler,
-  Select
+  Select,
+  Typography
 } from "@material-tailwind/react";
 import { RiBarChartHorizontalFill } from "react-icons/ri";
 import { IoLogOutOutline } from "react-icons/io5";
 import { BiSearch } from "react-icons/bi";
-import { MdBookmarkAdd, MdFilterAlt, MdOutlineBookmarkAdd } from "react-icons/md";
+import { MdBookmarkAdd, MdFilterAlt, MdOutlineBookmarkAdd, MdOutlineClose } from "react-icons/md";
 import Link from "next/link";
 import { useFormik } from "formik";
-import { FavoriteStatus } from "@prisma/client";
+import { FavoriteStatus, Label } from "@prisma/client";
+import { trpc } from "src/utils/trpc";
+import Loader from "@components/loader";
+import ScrollContainer from "react-indiana-drag-scroll";
 
 interface FilterValues {
   searchBy: string;
   status: string;
   orderBy: string;
+  labels: string[];
 }
 
 function Navbar() {
@@ -46,10 +52,15 @@ function Navbar() {
 
   const { data: session } = useSession();
 
+  const { data, isLoading } = trpc.useQuery(["labels.labels"], {
+    refetchOnWindowFocus: true
+  });
+
   const initialValues: FilterValues = {
     searchBy: "",
     status: "",
-    orderBy: ""
+    orderBy: "",
+    labels: []
   };
 
   const handleSubmit = (values: FilterValues) => {
@@ -62,6 +73,11 @@ function Navbar() {
     }
     if (values.orderBy !== "") {
       params.append("orderBy", values.orderBy);
+    }
+    if (values.labels.length !== 0) {
+      values.labels.forEach((label) => {
+        params.append("label", label);
+      });
     }
     const queryString = params.toString();
     router.push({
@@ -123,6 +139,7 @@ function Navbar() {
                   <Input
                     size="lg"
                     className="search-bar w-[22rem]"
+                    placeholder="Search favorites..."
                     label={undefined}
                     labelProps={undefined}
                     icon={<BiSearch size={24} onClick={toggleFilter} />}
@@ -200,10 +217,56 @@ function Navbar() {
                         </Select>
                       )}
                     </div>
+                    <Typography className={`text-sm text-gray-700 mt-3 mb-1 ${!data && "hidden"}`}>
+                      Labels
+                    </Typography>
+                    <ScrollContainer
+                      className="scroll-container overflow-x-auto overflow-y-hidden whitespace-nowrap relative"
+                      vertical={false}
+                    >
+                      {isLoading && <Loader />}
+                      {data &&
+                        data.map((label) => (
+                          <Chip
+                            key={label.id}
+                            value={label.name}
+                            className={`!normal-case text-xs  rounded-full !py-1 mr-1 cursor-pointer ${
+                              formik.values.labels.includes(label.name)
+                                ? "bg-fav-300 text-white hover:bg-gray-300 hover:text-fav-700"
+                                : "bg-gray-300 text-gray-700 hover:bg-fav-300 hover:text-white"
+                            }`}
+                            icon={
+                              formik.values.labels.includes(label.name) ? (
+                                <MdOutlineClose className="!text-white w-3 h-3 m-1" />
+                              ) : null
+                            }
+                            onTap={() => {
+                              if (formik.values.labels.includes(label.name)) {
+                                formik.setFieldValue(
+                                  "labels",
+                                  formik.values.labels.filter((l) => l !== label.name)
+                                );
+                              } else {
+                                formik.setFieldValue("labels", [
+                                  ...formik.values.labels,
+                                  label.name
+                                ]);
+                              }
+                            }}
+                          />
+                        ))}
+                    </ScrollContainer>
+
                     <Button type="submit" className="btn btn-fav mt-7 shadow-fav">
                       <MdFilterAlt className="w-6 h-6 text-gray-900" />
                       Filter
                     </Button>
+                    <div
+                      className="w-full text-center hover:underline cursor-pointer hover:text-fav-300 mt-5"
+                      onClick={() => formik.resetForm()}
+                    >
+                      Reset
+                    </div>
                   </form>
                 </PopoverContent>
               </Popover>

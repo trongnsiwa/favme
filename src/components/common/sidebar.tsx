@@ -39,9 +39,6 @@ function Sidebar() {
       }
     ],
     {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
       onSuccess: (data) => {
         setOwnCategories(data);
       }
@@ -178,6 +175,8 @@ function Sidebar() {
                     size="md"
                     onClick={() => {
                       closeMode();
+                      setSearchBy("");
+                      refetch();
                       router.back();
                       toggleManageCategory(false);
                     }}

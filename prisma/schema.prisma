@@ -47,6 +47,7 @@ model User {
     sessions      Session[]
     favorites     Favorite[]
     Category      Category[]
+    Label         Label[]
 }
 
 model VerificationToken {
@@ -88,6 +89,8 @@ model Favorite {
     categoryId String         @db.ObjectId
     creator    User           @relation(fields: [creatorId], references: [id])
     creatorId  String         @db.ObjectId
+    labelIDs   String[]       @db.ObjectId
+    labels     Label[]        @relation(fields: [labelIDs], references: [id])
 
     @@unique([id, categoryId, creatorId])
 }
@@ -95,4 +98,18 @@ model Favorite {
 enum FavoriteStatus {
     UNFAVORED
     FAVORED
+}
+
+model Label {
+    id   String @id @default(auto()) @map("_id") @db.ObjectId
+    name String @unique
+
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    favoriteIDs String[]   @db.ObjectId
+    favorites   Favorite[] @relation(fields: [favoriteIDs], references: [id])
+    creator     User       @relation(fields: [creatorId], references: [id])
+    creatorId   String     @db.ObjectId
+
+    @@unique([id, creatorId])
 }

@@ -1,11 +1,6 @@
 import create from "zustand";
-import { Category, Favorite } from "@prisma/client";
+import { Category, Favorite, Label } from "@prisma/client";
 
-interface FilterType {
-  searchBy: string;
-  status: string;
-  orderBy: string;
-}
 interface StoreState {
   screenLoading: boolean;
   showScreenLoading: (isLoading: boolean) => void;
@@ -15,8 +10,8 @@ interface StoreState {
   setOwnCategories: (categories: Category[]) => void;
   showFavorite: boolean;
   toggleFavorite: () => void;
-  favorite: (Favorite & { category: Category }) | null;
-  setFavorite: (favorite: Favorite & { category: Category }) => void;
+  favorite: (Favorite & { category: Category } & { labels: Label[] }) | null;
+  setFavorite: (favorite: Favorite & { category: Category; labels: Label[] }) => void;
   refetchFavorites: any;
   setRefetchFavorites: (refetch: any) => void;
   manageCategory: boolean;
