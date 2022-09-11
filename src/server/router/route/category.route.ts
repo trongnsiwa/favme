@@ -4,7 +4,8 @@ import * as trpc from "@trpc/server";
 import {
   createCategorySchema,
   deleteCategorySchema,
-  editCategorySchema
+  editCategorySchema,
+  getCategoriesSchema
 } from "src/schemas/category.schema";
 import { createRouter } from "../createRouter";
 
@@ -50,10 +51,15 @@ export const categoryRouter = createRouter()
     }
   })
   .query("categories", {
-    resolve({ ctx }) {
+    input: getCategoriesSchema,
+    resolve({ ctx, input }) {
       return ctx.prisma.category.findMany({
         where: {
-          creatorId: ctx.session?.user?._id
+          creatorId: ctx.session?.user?._id,
+          name: {
+            contains: input.searchBy ?? undefined,
+            mode: "insensitive"
+          }
         },
         orderBy: {
           name: "asc"

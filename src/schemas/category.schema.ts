@@ -139,3 +139,7 @@ export type EditCategoryInput = z.TypeOf<typeof editCategorySchema>;
 export const deleteCategorySchema = z.object({
   id: z.string()
 });
+
+export const getCategoriesSchema = z.object({
+  searchBy: z.string().optional()
+});

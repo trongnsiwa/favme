@@ -7,20 +7,14 @@ import favmeLogo from "@public/favme-white-text-logo.png";
 import { trpc } from "src/utils/trpc";
 import { DynamicFaIcon } from "@components/dynamic-icon";
 import * as Icons from "react-icons/fa";
-import { IconButton, Tooltip } from "@material-tailwind/react";
-import { BiCategory } from "react-icons/bi";
+import { IconButton, Input, Tooltip } from "@material-tailwind/react";
+import { BiCategory, BiSearch } from "react-icons/bi";
 import { useBoolean } from "usehooks-ts";
-import {
-  IoChevronForwardCircleOutline,
-  IoChevronForwardOutline,
-  IoCloseOutline
-} from "react-icons/io5";
+import { IoChevronForwardOutline, IoCloseOutline } from "react-icons/io5";
 import { MdPlaylistAdd } from "react-icons/md";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
 import { useState } from "react";
 import { Category } from "@prisma/client";
-import { AiOutlineEye } from "react-icons/ai";
 import AddCategoryDialog from "@components/dialogs/add-category";
 import CategoryDetailDialog from "@components/dialogs/category-detail";
 
@@ -31,35 +25,28 @@ function Sidebar() {
   const { toggle: toggleDetail, value: openDetail } = useBoolean(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
+  const [searchBy, setSearchBy] = useState("");
+
   const openSidebar = useStore((state) => state.openSidebar);
   const setOwnCategories = useStore((state) => state.setOwnCategories);
   const toggleManageCategory = useStore((state) => state.toggleManageCategory);
 
-  const { data, isLoading, refetch } = trpc.useQuery(["categories.categories"], {
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      setOwnCategories(data);
-    }
-  });
-
-  const { mutate: mutateDel, isLoading: loadingDel } = trpc.useMutation(
-    ["categories.delete-category"],
+  const { data, isLoading, refetch } = trpc.useQuery(
+    [
+      "categories.categories",
+      {
+        searchBy
+      }
+    ],
     {
-      onSuccess: () => {
-        refetch();
-        toast.success("Delete category successfully!");
-      },
-      onError: (err) => {
-        toast.error(err.message);
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      onSuccess: (data) => {
+        setOwnCategories(data);
       }
     }
   );
-
-  const handleDelete = (values: { id: string }) => {
-    mutateDel(values);
-  };
 
   useEffect(() => {
     if (mode) {
@@ -87,6 +74,25 @@ function Sidebar() {
               <Image src={favmeLogo} alt="Favme" objectFit="fill" />
             </div>
           </div>
+
+          {mode && (
+            <div className="relative">
+              <Input
+                variant="standard"
+                size="lg"
+                label=""
+                color="green"
+                className="w-full !p-4 !text-white relative"
+                name="searchBy"
+                value={searchBy}
+                onChange={(e) => setSearchBy(e.target.value)}
+              />
+              <BiSearch
+                size={24}
+                className="absolute text-gray-400 !top-1/2 !right-1 !-translate-y-1/2"
+              />
+            </div>
+          )}
 
           <ul
             className={`flex flex-col p-4 ${
