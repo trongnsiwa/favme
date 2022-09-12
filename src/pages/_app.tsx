@@ -3,7 +3,7 @@ import { httpBatchLink } from "@trpc/client/links/httpBatchLink";
 import { loggerLink } from "@trpc/client/links/loggerLink";
 import { withTRPC } from "@trpc/next";
 import { SessionProvider } from "next-auth/react";
-import type { AppType } from "next/dist/shared/lib/utils";
+import type { AppProps } from "next/app";
 import superjson from "superjson";
 import "../styles/globals.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,7 +26,7 @@ const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
   return <Layout>{children}</Layout>;
 };
 
-const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
+const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <Head>
@@ -35,7 +35,7 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
         <meta name="description" content="A favorite link storage app made by trongnsi" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <SessionProvider session={session}>
+      <SessionProvider session={pageProps.session}>
         <ThemeProvider>
           <ScreenLoading />
           <NextNProgress color="#678583" height={3} options={{ showSpinner: false }} />
