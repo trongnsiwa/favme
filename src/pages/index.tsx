@@ -1,13 +1,13 @@
 import { useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { setCookie } from "cookies-next";
+import { hasCookie, setCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
 import { trpc } from "src/utils/trpc";
 import { defaultCategories } from "src/schemas/category.schema";
 import { useStore } from "src/store/store";
 
-const Home = ({ pageVisited }: { pageVisited: boolean }) => {
+const Home = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -35,7 +35,7 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
     if (ownCategories.length !== 0 && ownCategories[0]) {
       router.replace(`/category${ownCategories[0].slug}`);
     } else {
-      if (!pageVisited && session?.user) {
+      if (!hasCookie("pageVisited") && session?.user) {
         generateDefaultCategories();
       } else {
         refetchCategories();
@@ -44,12 +44,6 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
   }, [ownCategories]);
 
   return <></>;
-};
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { pageVisited } = ctx.req.cookies;
-
-  return { props: { pageVisited: pageVisited ?? null } };
 };
 
 export default Home;
