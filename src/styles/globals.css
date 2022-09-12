@@ -16,6 +16,10 @@
 }
 
 @layer components {
+  body {
+    @apply selection:bg-fav-100;
+  }
+
   .shadow-outline {
     @apply !ring-transparent focus:!outline-none focus:!outline-offset-2 focus:!shadow-[0px_3px_1px_2px_#619b67] focus:!shadow-fav-300 hover:!shadow-[0px_3px_1px_2px_#619b67] hover:!shadow-fav-300  hover:border-fav-300  focus:border-fav-300  hover:!text-fav-300  focus:!text-fav-300;
   }

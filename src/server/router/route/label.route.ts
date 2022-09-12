@@ -1,4 +1,4 @@
-import { getLabelByFavoriteSchema } from "src/schemas/label.schema";
+import { deleteLabelSchema, getLabelByFavoriteSchema } from "src/schemas/label.schema";
 import { createRouter } from "../createRouter";
 
 export const labelRouter = createRouter()
@@ -28,6 +28,16 @@ export const labelRouter = createRouter()
         },
         orderBy: {
           name: "asc"
+        }
+      });
+    }
+  })
+  .mutation("delete-label", {
+    input: deleteLabelSchema,
+    async resolve({ ctx, input }) {
+      return ctx.prisma.label.delete({
+        where: {
+          id: input.id
         }
       });
     }

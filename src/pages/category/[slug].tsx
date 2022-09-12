@@ -30,8 +30,7 @@ function CategoryPage() {
       }
     ],
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnWindowFocus: false
+      getNextPageParam: (lastPage) => lastPage.nextCursor
     }
   );
 

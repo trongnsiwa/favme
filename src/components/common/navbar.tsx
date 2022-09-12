@@ -1,13 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useRef } from "react";
 import { useStore } from "src/store/store";
-import { useBoolean, useOnClickOutside } from "usehooks-ts";
+import { useBoolean } from "usehooks-ts";
 import {
   Avatar,
   Button,
   Chip,
+  Dialog,
+  DialogBody,
+  DialogHeader,
   IconButton,
   Input,
   Menu,
@@ -33,6 +35,11 @@ import { trpc } from "src/utils/trpc";
 import Loader from "@components/loader";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { deleteCookie } from "cookies-next";
+import { AiOutlineReload, AiOutlineTags } from "react-icons/ai";
+import tagImage from "@public/tag.png";
+import Image from "next/image";
+import dayjs from "dayjs";
+import LabelDelete from "@components/label-delete";
 
 interface FilterValues {
   searchBy: string;
@@ -42,20 +49,17 @@ interface FilterValues {
 }
 
 function Navbar() {
-  const { setFalse, toggle } = useBoolean(false);
   const { value: openFilter, setFalse: closeFilter, toggle: toggleFilter } = useBoolean(false);
+  const { value: openLabel, toggle: toggleLabel } = useBoolean(false);
 
   const router = useRouter();
-  const menuRef = useRef(null);
 
   const openSidebar = useStore((state) => state.openSidebar);
   const toggleSidebar = useStore((state) => state.toggleSidebar);
 
   const { data: session } = useSession();
 
-  const { data, isLoading } = trpc.useQuery(["labels.labels"], {
-    refetchOnWindowFocus: true
-  });
+  const { data, isLoading, refetch } = trpc.useQuery(["labels.labels"]);
 
   const initialValues: FilterValues = {
     searchBy: "",
@@ -100,8 +104,6 @@ function Navbar() {
     router.replace("/login");
     router.reload();
   };
-
-  useOnClickOutside(menuRef, setFalse);
 
   return (
     <AnimatePresence initial={false}>
@@ -292,7 +294,7 @@ function Navbar() {
               </Link>
               <Menu lockScroll={true}>
                 <MenuHandler>
-                  <Button variant="text" onClick={toggle} className="btn-avatar">
+                  <Button variant="text" className="btn-avatar">
                     <Avatar
                       className="avatar cursor-pointer bg-white"
                       variant="circular"
@@ -313,6 +315,21 @@ function Navbar() {
                     <Button
                       variant="text"
                       type="button"
+                      onClick={() => {
+                        refetch();
+                        toggleLabel();
+                      }}
+                      className="btn-menu !normal-case"
+                      ripple={false}
+                    >
+                      <AiOutlineTags className="inline-block w-5 h-5 mr-2" />
+                      Your Labels
+                    </Button>
+                  </MenuItem>
+                  <MenuItem className="menu-item">
+                    <Button
+                      variant="text"
+                      type="button"
                       onClick={() => logOut()}
                       className="btn-menu !normal-case"
                       ripple={false}
@@ -327,6 +344,45 @@ function Navbar() {
           </div>
         </MTNavbar>
       </motion.div>
+
+      <Dialog
+        open={openLabel}
+        handler={toggleLabel}
+        animate={{
+          mount: { scale: 1, y: 0 },
+          unmount: { scale: 0.9, y: -100 }
+        }}
+        className="p-5"
+        size="lg"
+        dismiss={{
+          outsidePointerDown: openLabel ? true : false
+        }}
+      >
+        <DialogHeader>
+          <div className="!font-bold !text-3xl text-fav-300 flex items-center gap-1">
+            <Image src={tagImage} alt="Flaticon" width={45} height={45} />
+            Your Labels
+          </div>
+        </DialogHeader>
+        <DialogBody className="block max-h-[60vh] overflow-y-auto relative">
+          {isLoading && <Loader />}
+          {data &&
+            data.map((label) => (
+              <div
+                key={label.id}
+                className="bg-white border border-gray-400 text-gray-800 mb-3 shadow-sm shadow-fav-200 font-medium flex justify-between items-center w-full py-3 px-10 rounded-md hover:shadow-md"
+              >
+                <div className="flex items-start gap-3">
+                  {label.name}
+                  <p className="text-xs font-normal text-gray-500">
+                    {dayjs(label.createdAt).format("DD/MM/YYYY HH:mm")}
+                  </p>
+                </div>
+                <LabelDelete id={label.id} />
+              </div>
+            ))}
+        </DialogBody>
+      </Dialog>
     </AnimatePresence>
   );
 }
