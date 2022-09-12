@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useStore } from "src/store/store";
 import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import {
@@ -28,10 +28,11 @@ import { BiSearch } from "react-icons/bi";
 import { MdBookmarkAdd, MdFilterAlt, MdOutlineBookmarkAdd, MdOutlineClose } from "react-icons/md";
 import Link from "next/link";
 import { useFormik } from "formik";
-import { FavoriteStatus, Label } from "@prisma/client";
+import { FavoriteStatus } from "@prisma/client";
 import { trpc } from "src/utils/trpc";
 import Loader from "@components/loader";
 import ScrollContainer from "react-indiana-drag-scroll";
+import { deleteCookie } from "cookies-next";
 
 interface FilterValues {
   searchBy: string;
@@ -94,7 +95,10 @@ function Navbar() {
 
   const logOut = () => {
     signOut();
+    deleteCookie("pageVisited");
+
     router.replace("/login");
+    router.reload();
   };
 
   useOnClickOutside(menuRef, setFalse);
@@ -257,7 +261,7 @@ function Navbar() {
                         ))}
                     </ScrollContainer>
 
-                    <Button type="submit" className="btn btn-fav mt-7 shadow-fav">
+                    <Button type="submit" className="btn btn-fav mt-7 shadow-fill">
                       <MdFilterAlt className="w-6 h-6 text-gray-900" />
                       Filter
                     </Button>
@@ -309,7 +313,7 @@ function Navbar() {
                     <Button
                       variant="text"
                       type="button"
-                      onClick={logOut}
+                      onClick={() => logOut()}
                       className="btn-menu !normal-case"
                       ripple={false}
                     >

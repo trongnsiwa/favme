@@ -12,6 +12,7 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
   const { data: session, status } = useSession();
 
   const ownCategories = useStore((state) => state.ownCategories);
+  const refetchCategories = useStore((state) => state.refetchCategories);
 
   if (status === "unauthenticated") {
     router.replace("/login");
@@ -21,7 +22,8 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
 
   const generateDefaultCategories = useCallback(() => {
     defaultCategories.forEach((category, index) => {
-      if (index === defaultCategories.length + 1) {
+      if (index === defaultCategories.length - 1) {
+        refetchCategories();
         setCookie("pageVisited", true);
       } else {
         mutate(category);
@@ -35,6 +37,8 @@ const Home = ({ pageVisited }: { pageVisited: boolean }) => {
     } else {
       if (!pageVisited && session?.user) {
         generateDefaultCategories();
+      } else {
+        refetchCategories();
       }
     }
   }, [ownCategories]);

@@ -16,9 +16,10 @@ module.exports = withMT({
           500: "#678583",
           600: "#4B605F"
         },
-        me: {
-          50: "#383838"
-        }
+        me: "#383838",
+        discord: "#5865F2",
+        google: "#E44539",
+        github: "#000"
       },
       fontFamily: {
         sans: ["'M PLUS Rounded 1c'", "Roboto", "sans-serif"]

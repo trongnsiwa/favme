@@ -18,6 +18,7 @@ model Account {
     provider          String
     providerAccountId String
     refresh_token     String? @db.String
+    // refresh_token_expires_in Int?
     access_token      String? @db.String
     expires_at        Int?
     token_type        String?
@@ -62,7 +63,7 @@ model Category {
     id          String     @id @default(auto()) @map("_id") @db.ObjectId
     name        String
     description String
-    slug        String     @unique
+    slug        String
     cover       String
     color       String
     createdAt   DateTime   @default(now())
@@ -71,14 +72,14 @@ model Category {
     creator     User       @relation(fields: [creatorId], references: [id])
     creatorId   String     @db.ObjectId
 
-    @@unique([id, creatorId])
+    @@unique([name, creatorId])
 }
 
 model Favorite {
     id          String @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
+    name        String @unique
     description String
-    slug        String @unique
+    slug        String
     cover       String
     link        String
 
@@ -92,7 +93,7 @@ model Favorite {
     labelIDs   String[]       @db.ObjectId
     labels     Label[]        @relation(fields: [labelIDs], references: [id])
 
-    @@unique([id, categoryId, creatorId])
+    @@unique([name, categoryId, creatorId])
 }
 
 enum FavoriteStatus {
@@ -111,5 +112,5 @@ model Label {
     creator     User       @relation(fields: [creatorId], references: [id])
     creatorId   String     @db.ObjectId
 
-    @@unique([id, creatorId])
+    @@unique([name, creatorId])
 }

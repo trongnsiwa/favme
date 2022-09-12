@@ -79,6 +79,7 @@ export const favoriteRouter = createRouter()
 
       const favorites = await ctx.prisma.favorite.findMany({
         where: {
+          creatorId: ctx.session?.user?._id,
           category: {
             slug: input.category
           },
@@ -224,6 +225,7 @@ export const favoriteRouter = createRouter()
 
       const favorites = await ctx.prisma.favorite.findMany({
         where: {
+          creatorId: ctx.session?.user?._id,
           status: FavoriteStatus.FAVORED,
           name: input.searchBy
             ? {

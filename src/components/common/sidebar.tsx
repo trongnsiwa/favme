@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Category } from "@prisma/client";
 import AddCategoryDialog from "@components/dialogs/add-category";
 import CategoryDetailDialog from "@components/dialogs/category-detail";
+import { hasCookie } from "cookies-next";
 
 function Sidebar() {
   const router = useRouter();
@@ -28,8 +29,10 @@ function Sidebar() {
   const [searchBy, setSearchBy] = useState("");
 
   const openSidebar = useStore((state) => state.openSidebar);
+  const toggleSidebar = useStore((state) => state.toggleSidebar);
   const setOwnCategories = useStore((state) => state.setOwnCategories);
   const toggleManageCategory = useStore((state) => state.toggleManageCategory);
+  const setRefetchCategories = useStore((state) => state.setRefetchCategories);
 
   const { data, isLoading, refetch } = trpc.useQuery(
     [
@@ -51,6 +54,10 @@ function Sidebar() {
       toggleManageCategory(true);
     }
   }, [mode]);
+
+  useEffect(() => {
+    setRefetchCategories(refetch);
+  }, [refetch, setRefetchCategories]);
 
   return (
     <AnimatePresence initial={false}>

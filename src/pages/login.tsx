@@ -2,6 +2,7 @@ import { Button, IconButton, Input, Typography } from "@material-tailwind/react"
 import Image from "next/image";
 import googleLogo from "@public/google-logo.png";
 import discordLogo from "@public/discord-logo.png";
+import githubLogo from "@public/github-logo.png";
 import favmeLogo from "@public/favme-logo.png";
 import { getProviders, signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -25,6 +26,8 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
     switch (provider.name) {
       case "Google":
         return googleLogo;
+      case "GitHub":
+        return githubLogo;
       default:
         return discordLogo;
     }
@@ -34,6 +37,8 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
     switch (provider.name) {
       case "Google":
         return "btn-google";
+      case "GitHub":
+        return "btn-github";
       default:
         return "btn-discord";
     }
@@ -60,10 +65,10 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
             <Image src={favmeLogo} alt="Favme" objectFit="fill" />
           </div>
 
-          <Typography variant="h2" className="flex text-me-50 font-extrabold justify-center">
+          <Typography variant="h2" className="flex text-me font-extrabold justify-center">
             Login to <span className="ml-3 text-fav-300">Fav.me</span>
           </Typography>
-          <div className="mt-5">
+          {/* <div className="mt-5">
             <Input
               variant="outlined"
               size="lg"
@@ -97,18 +102,19 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
                 Forgot Password?
               </p>
             </Link>
-          </div>
+          </div> */}
           <div className="divide-y divide-gray-300 w-full">
-            <Button type="button" className="btn btn-fav mt-5 shadow-fav">
+            {/* <Button type="button" className="btn btn-fav mt-5 shadow-fav">
               Sign In
-            </Button>
-            <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div>
-            <div className="mt-3">
+            </Button> */}
+            {/* <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div> */}
+            <div></div>
+            <div className="mt-5 pt-5">
               {Object.values(providers).map((provider) => (
                 <div key={provider.name}>
                   <Button
                     type="button"
-                    className={`btn mt-3 mb-5 shadow-fav ${getBtnColor(provider)}`}
+                    className={`btn mt-3 mb-5 shadow-outline ${getBtnColor(provider)}`}
                     onClick={() => signIn(provider.id)}
                   >
                     <Image src={getLogo(provider)} alt="Google" width={30} height={30} />
@@ -119,12 +125,12 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
             </div>
           </div>
         </form>
-        <div className="flex justify-center align-center mt-10">
+        {/* <div className="flex justify-center align-center mt-10">
           <p className="pr-2 text-sm">Don&apos;t have any account? </p>
           <Link href="/sign-up">
             <p className="text-fav-500 text-sm hover:underline hover:cursor-pointer">Register</p>
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );

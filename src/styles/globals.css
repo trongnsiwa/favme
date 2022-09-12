@@ -16,8 +16,12 @@
 }
 
 @layer components {
-  .shadow-fav {
-    @apply !shadow-[3px_5px_1px_3px_#383838] !ring-transparent focus:!outline-none focus:!outline-offset-2  focus:!shadow-[0px_3px_1px_2px_#383838] focus:!shadow-me-50 hover:!shadow-[0px_3px_1px_2px_#383838] hover:!shadow-me-50;
+  .shadow-outline {
+    @apply !ring-transparent focus:!outline-none focus:!outline-offset-2 focus:!shadow-[0px_3px_1px_2px_#619b67] focus:!shadow-fav-300 hover:!shadow-[0px_3px_1px_2px_#619b67] hover:!shadow-fav-300  hover:border-fav-300  focus:border-fav-300  hover:!text-fav-300  focus:!text-fav-300;
+  }
+
+  .shadow-fill {
+    @apply !shadow-[3px_5px_1px_3px_#383838] !ring-transparent focus:!outline-none focus:!outline-offset-2  focus:!shadow-[0px_3px_1px_2px_#383838] focus:!shadow-me hover:!shadow-[0px_3px_1px_2px_#383838] hover:!shadow-me;
   }
 
   .btn {
@@ -29,11 +33,15 @@
   }
 
   .btn-discord {
-    @apply !bg-[#5865F2] !text-white;
+    @apply !shadow-[3px_5px_1px_3px_#5865F2]  !bg-white !text-discord border border-discord;
   }
 
   .btn-google {
-    @apply !bg-white;
+    @apply !shadow-[3px_5px_1px_3px_#E44539]  !bg-white !text-google  border border-google;
+  }
+
+  .btn-github {
+    @apply !shadow-[3px_5px_1px_3px_#000] !bg-white !text-github border border-github;
   }
 
   .btn-icon {

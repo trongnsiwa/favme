@@ -16,6 +16,8 @@ interface StoreState {
   setRefetchFavorites: (refetch: any) => void;
   manageCategory: boolean;
   toggleManageCategory: (open: boolean) => void;
+  refetchCategories: () => boolean;
+  setRefetchCategories: (refetch: any) => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
@@ -32,5 +34,7 @@ export const useStore = create<StoreState>((set) => ({
   refetchFavorites: null,
   setRefetchFavorites: (refetch) => set({ refetchFavorites: refetch }),
   manageCategory: false,
-  toggleManageCategory: (open) => set((state) => ({ manageCategory: open }))
+  toggleManageCategory: (open) => set((state) => ({ manageCategory: open })),
+  refetchCategories: () => true,
+  setRefetchCategories: (refetch) => set({ refetchCategories: refetch })
 }));

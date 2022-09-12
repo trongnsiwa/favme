@@ -6,14 +6,22 @@ import { RiHeartAddLine } from "react-icons/ri";
 import { useBoolean } from "usehooks-ts";
 import AddNewDialog from "@components/dialogs/add-new-fav";
 import FavDetailDialog from "@components/dialogs/fav-detail";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type LayoutProps = { children: React.ReactNode };
 
 function Layout({ children }: LayoutProps) {
+  const router = useRouter();
+  const { status } = useSession();
   const openSidebar = useStore((state) => state.openSidebar);
   const manageCategory = useStore((state) => state.manageCategory);
 
   const { toggle, value: isAdd } = useBoolean(false);
+
+  if (status === "unauthenticated") {
+    router.replace("/login");
+  }
 
   return (
     <div

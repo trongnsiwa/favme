@@ -60,7 +60,7 @@ function SignUpPage({ providers }: { providers: Record<string, Provider> }) {
           <div className="w-1/2 mx-auto mb-2">
             <Image src={favmeLogo} alt="Favme" objectFit="fill" />
           </div>
-          <Typography variant="h3" className="flex text-me-50 font-extrabold gap-2">
+          <Typography variant="h3" className="flex text-me font-extrabold gap-2">
             <span className="text-fav-300">Join</span> now!
           </Typography>
           <div className="mt-5">
