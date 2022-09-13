@@ -23,7 +23,7 @@ export const getFavoriteByCategorySchemma = z.object({
   orderBy: z.string().optional(),
   category: z.string().min(1),
   labels: z.array(z.string()).optional().or(z.string().optional()),
-  cursor: z.number().nullish(),
+  cursor: z.string().nullish(),
   limit: z.number().min(1).nullish()
 });
 

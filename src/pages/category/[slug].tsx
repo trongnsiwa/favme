@@ -8,6 +8,7 @@ import { trpc } from "src/utils/trpc";
 import noFoundImage from "@public/bookmark.png";
 import Image from "next/image";
 import { useStore } from "src/store/store";
+import { uniqueId } from "lodash";
 
 function CategoryPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ function CategoryPage() {
 
   const setRefetchFavorites = useStore((state) => state.setRefetchFavorites);
 
-  const { ref, inView } = useInView();
+  const { ref, inView } = useInView({ threshold: 0 });
 
   const { data, fetchNextPage, hasNextPage, refetch, isLoading } = trpc.useInfiniteQuery(
     [
@@ -38,23 +39,23 @@ function CategoryPage() {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage]);
 
   useEffect(() => {
     setRefetchFavorites(refetch);
   }, []);
 
   return (
-    <>
+    <div className="h-full">
       <div className="flex flex-wrap gap-7">
         {data &&
           data.pages.map((page, index) => (
             <div
-              key={page?.nextCursor?.toString().concat(index.toString()) ?? "lastPage"}
+              key={uniqueId() + page?.nextCursor?.toString().concat(index.toString()) ?? "lastPage"}
               className="flex flex-wrap gap-7"
             >
               {page.favorites.map((favorite) => (
-                <FavCard key={favorite.id} favorite={favorite} refetch={refetch} />
+                <FavCard key={uniqueId() + favorite.id} favorite={favorite} refetch={refetch} />
               ))}
             </div>
           ))}
@@ -80,7 +81,7 @@ function CategoryPage() {
       <span style={{ visibility: "hidden" }} ref={ref}>
         intersection observer marker
       </span>
-    </>
+    </div>
   );
 }
 

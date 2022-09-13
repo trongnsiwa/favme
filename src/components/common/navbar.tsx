@@ -40,6 +40,7 @@ import tagImage from "@public/tag.png";
 import Image from "next/image";
 import dayjs from "dayjs";
 import LabelDelete from "@components/label-delete";
+import { uniqueId } from "lodash";
 
 interface FilterValues {
   searchBy: string;
@@ -116,6 +117,7 @@ function Navbar() {
           width: "calc(100%-280px)"
         }}
         transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+        key={uniqueId()}
       >
         <MTNavbar
           className={`bg-fav-200 shadow-lg px-3 right-0 top-0 rounded-none fixed border-none ${
@@ -234,7 +236,7 @@ function Navbar() {
                       {data &&
                         data.map((label) => (
                           <Chip
-                            key={label.id}
+                            key={"search_" + label.id}
                             value={label.name}
                             className={`!normal-case text-xs  rounded-full !py-1 mr-1 cursor-pointer ${
                               formik.values.labels.includes(label.name)
@@ -369,7 +371,7 @@ function Navbar() {
           {data &&
             data.map((label) => (
               <div
-                key={label.id}
+                key={"setting_" + label.id}
                 className="bg-white border border-gray-400 text-gray-800 mb-3 shadow-sm shadow-fav-200 font-medium flex justify-between items-center w-full py-3 px-10 rounded-md hover:shadow-md"
               >
                 <div className="flex items-start gap-3">

@@ -102,7 +102,7 @@ export const favoriteRouter = createRouter()
             : undefined
         },
         take: limit + 1,
-        cursor: cursor ? { id: cursor.toString() } : undefined,
+        cursor: cursor ? { id: cursor } : undefined,
         include: {
           category: true,
           labels: true
@@ -120,14 +120,14 @@ export const favoriteRouter = createRouter()
                 : undefined
             }
           : {
-              status: "asc"
+              createdAt: "desc"
             }
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
       if (favorites.length > limit) {
         const nextItem = favorites.pop();
-        nextCursor = parseInt(nextItem!.id as string, 10);
+        nextCursor = nextItem!.id;
       }
       return {
         favorites,
@@ -249,14 +249,18 @@ export const favoriteRouter = createRouter()
           category: true,
           labels: true
         },
-        orderBy: {
-          name: input.orderBy?.startsWith("name")
-            ? (input.orderBy.split("_")[1] as "asc" | "desc")
-            : undefined,
-          createdAt: input.orderBy?.startsWith("createdAt")
-            ? (input.orderBy.split("_")[1] as "asc" | "desc")
-            : undefined
-        }
+        orderBy: input.orderBy
+          ? {
+              name: input.orderBy?.startsWith("name")
+                ? (input.orderBy.split("_")[1] as "asc" | "desc")
+                : undefined,
+              createdAt: input.orderBy?.startsWith("createdAt")
+                ? (input.orderBy.split("_")[1] as "asc" | "desc")
+                : undefined
+            }
+          : {
+              createdAt: "desc"
+            }
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
