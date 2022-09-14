@@ -15,6 +15,7 @@ function defineNextConfig(config) {
 export default defineNextConfig({
   reactStrictMode: true,
   images: {
+    path: "/",
     domains: ["lh3.googleusercontent.com", "https://vectorified.com/images"]
   }
 });
