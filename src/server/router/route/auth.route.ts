@@ -3,7 +3,11 @@ import { signUpSchema } from "src/schemas/auth.schema";
 import { createRouter } from "../createRouter";
 import * as trpc from "@trpc/server";
 
-export const authRouter = createRouter();
+export const authRouter = createRouter().query("get-user", {
+  resolve: async ({ input, ctx }) => {
+    const email = "trongnsiwa79@gmail.com";
+  }
+});
 // .mutation("signup", {
 //   input: signUpSchema,
 //   resolve: async ({ input, ctx }) => {

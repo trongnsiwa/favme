@@ -14,6 +14,7 @@ import Link from "next/link";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useBoolean } from "usehooks-ts";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 
 interface LoginValues {
   email: string;
@@ -47,7 +48,7 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
   const getBtnColor = (provider: Provider) => {
     switch (provider.name) {
       case "Google":
-        return "btn-google";
+        return "!bg-white !border !border-black";
       case "GitHub":
         return "btn-github";
       default:
@@ -56,15 +57,12 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
   };
 
   const handleSubmit = (values: LoginValues) => {
-    const loadingTimeout = setTimeout(() => setLoading(true), 3000);
-
+    // signIn("email", { email: values.email });
     if (
-      values.email === "trongnsi" &&
-      values.password === "$2a$10$HKfVL5Q.GqqyQlL2lbHHn.KR2rmydPZ5yEc2gEVGOw0zZIZhYS4.i"
+      values.email === "trongnsiwa79@gmail.com" &&
+      values.password === "$2a$10$yH1M1yJaeFRRO7DUOgWNRuGCfbV0zuyGUuf1TkcYqy9C2jDGJ/zee"
     ) {
-      setLoading(false);
-      router.replace("/");
-      clearTimeout(loadingTimeout);
+      signIn();
     }
   };
 
@@ -89,7 +87,7 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
   return (
     <div className="w-full h-screen relative bg-fav-300">
       <div className="w-[35em] min-h-[calc(100vh-500px)] bg-white rounded-2xl shadow-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-20 py-20">
-        <form>
+        <form onSubmit={formik.handleSubmit}>
           <div className="w-1/5 mx-auto mb-2">
             <Image src={favmeLogo} alt="Favme" objectFit="fill" />
           </div>
@@ -97,13 +95,16 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
           <Typography variant="h2" className="flex text-me font-extrabold justify-center">
             Login to <span className="ml-3 text-fav-300">Fav.me</span>
           </Typography>
-          <div className="mt-5">
+          {/* <div className="mt-5">
             <Input
               variant="outlined"
               size="lg"
               label="Email"
               color="light-green"
               className="text-base"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
             />
           </div>
           <div className="mt-3">
@@ -124,7 +125,7 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
               color="light-green"
               className="text-base"
             />
-          </div>
+          </div> */}
           {/* <div className="flex justify-end mt-2">
             <Link href="/forgot-password">
               <p className="text-sm hover:underline text-fav-500 hover:cursor-pointer">
@@ -133,24 +134,28 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
             </Link>
           </div> */}
           <div className="divide-y divide-gray-300 w-full">
-            <Button type="button" className="btn btn-fav mt-5 shadow-fav">
+            {/* <Button className="btn btn-fav mt-5 shadow-fill" onClick={() => signIn()}>
               Sign In
             </Button>
-            <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div>
-            <div></div>
-            <div className="mt-5 pt-5">
-              {Object.values(providers).map((provider) => (
-                <div key={provider.name}>
-                  <Button
-                    type="button"
-                    className={`btn mt-3 mb-5 shadow-outline ${getBtnColor(provider)}`}
-                    onClick={() => signIn(provider.id)}
-                  >
-                    <Image src={getLogo(provider)} alt="Google" width={30} height={30} />
-                    Sign-in with {provider.name}
-                  </Button>
-                </div>
-              ))}
+            <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div> */}
+            <div className="mt-5">
+              {Object.values(providers).map(
+                (provider) =>
+                  provider.name != "Email" &&
+                  provider.name != "Discord" &&
+                  provider.name != "Google" && (
+                    <div key={provider.name}>
+                      <Button
+                        type="button"
+                        className={`btn mt-3 mb-5 shadow-fill ${getBtnColor(provider)}`}
+                        onClick={() => signIn(provider.id)}
+                      >
+                        <Image src={getLogo(provider)} alt="" width={30} height={30} />
+                        Sign-in with {provider.name}
+                      </Button>
+                    </div>
+                  )
+              )}
             </div>
           </div>
         </form>
