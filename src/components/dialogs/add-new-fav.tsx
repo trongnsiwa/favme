@@ -11,7 +11,7 @@ import {
   Typography
 } from "@material-tailwind/react";
 import Image from "next/image";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import noImage from "@public/no-image.png";
 import addIcon from "@public/add.png";
 import { IoAddOutline } from "react-icons/io5";
@@ -67,7 +67,7 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
     }
   });
 
-  const { isLoading: loadingLabels } = trpc.useQuery(["labels.labels"], {
+  const { isLoading: loadingLabels, refetch } = trpc.useQuery(["labels.labels"], {
     onSuccess: (data) => {
       setLabels(data.map((l) => ({ value: l.name, label: l.name })));
     },
@@ -116,6 +116,10 @@ function AddNewDialog({ open, handleOpen }: AddNewDialogProps) {
     validationSchema: addNewSchema,
     onSubmit: handleSubmit
   });
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   return (
     <Dialog

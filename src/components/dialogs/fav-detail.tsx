@@ -16,7 +16,7 @@ import {
   Typography
 } from "@material-tailwind/react";
 import Image from "next/image";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import noImage from "@public/no-image.png";
 import infoImage from "@public/about.png";
 import { useStore } from "src/store/store";
@@ -32,9 +32,7 @@ import { useBoolean, useOnClickOutside } from "usehooks-ts";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { VscOpenPreview } from "react-icons/vsc";
-import { Label } from "@prisma/client";
 import Creatable from "react-select/creatable";
-import { ObjectId } from "bson";
 
 interface MultiSelectType {
   value: string;
@@ -67,7 +65,7 @@ function FavDetailDialog() {
   const fileRef = useRef<HTMLInputElement>(null);
   const ownCategories = useStore((state) => state.ownCategories);
 
-  const { isLoading: loadingLabels } = trpc.useQuery(["labels.labels"], {
+  const { isLoading: loadingLabels, refetch } = trpc.useQuery(["labels.labels"], {
     onSuccess: (data) => {
       setLabels(data.map((l) => ({ value: l.name, label: l.name })));
     },
@@ -155,6 +153,10 @@ function FavDetailDialog() {
       formikHelpers.setValues(initialValues);
     }
   });
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   useOnClickOutside(menuRef, () => setTrue());
 

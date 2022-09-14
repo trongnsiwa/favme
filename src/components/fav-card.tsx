@@ -42,7 +42,7 @@ function FavCard({ favorite, refetch }: FavCardProps) {
   };
 
   return (
-    <Card className="w-[22rem] hover:shadow-lg hover:shadow-fav-200">
+    <Card className="hover:shadow-lg hover:shadow-fav-200">
       <CardBody className="flex flex-col justify-between h-full">
         <div>
           <img

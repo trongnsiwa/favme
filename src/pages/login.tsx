@@ -13,6 +13,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useBoolean } from "usehooks-ts";
+import { useFormik } from "formik";
+
+interface LoginValues {
+  email: string;
+  password: string;
+}
 
 function LoginPage({ providers }: { providers: Record<string, Provider> }) {
   const router = useRouter();
@@ -21,6 +27,11 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
   const setLoading = useStore((state) => state.showScreenLoading);
 
   const { toggle, value } = useBoolean(true);
+
+  const initialValues: LoginValues = {
+    email: "",
+    password: ""
+  };
 
   const getLogo = (provider: Provider) => {
     switch (provider.name) {
@@ -43,6 +54,24 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
         return "btn-discord";
     }
   };
+
+  const handleSubmit = (values: LoginValues) => {
+    const loadingTimeout = setTimeout(() => setLoading(true), 3000);
+
+    if (
+      values.email === "trongnsi" &&
+      values.password === "$2a$10$HKfVL5Q.GqqyQlL2lbHHn.KR2rmydPZ5yEc2gEVGOw0zZIZhYS4.i"
+    ) {
+      setLoading(false);
+      router.replace("/");
+      clearTimeout(loadingTimeout);
+    }
+  };
+
+  const formik = useFormik({
+    initialValues,
+    onSubmit: handleSubmit
+  });
 
   useEffect(() => {
     switch (status) {
@@ -68,7 +97,7 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
           <Typography variant="h2" className="flex text-me font-extrabold justify-center">
             Login to <span className="ml-3 text-fav-300">Fav.me</span>
           </Typography>
-          {/* <div className="mt-5">
+          <div className="mt-5">
             <Input
               variant="outlined"
               size="lg"
@@ -96,7 +125,7 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
               className="text-base"
             />
           </div>
-          <div className="flex justify-end mt-2">
+          {/* <div className="flex justify-end mt-2">
             <Link href="/forgot-password">
               <p className="text-sm hover:underline text-fav-500 hover:cursor-pointer">
                 Forgot Password?
@@ -104,10 +133,10 @@ function LoginPage({ providers }: { providers: Record<string, Provider> }) {
             </Link>
           </div> */}
           <div className="divide-y divide-gray-300 w-full">
-            {/* <Button type="button" className="btn btn-fav mt-5 shadow-fav">
+            <Button type="button" className="btn btn-fav mt-5 shadow-fav">
               Sign In
-            </Button> */}
-            {/* <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div> */}
+            </Button>
+            <div className="text-gray-400 w-full text-center mt-5 pt-3">Or</div>
             <div></div>
             <div className="mt-5 pt-5">
               {Object.values(providers).map((provider) => (

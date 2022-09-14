@@ -47,18 +47,13 @@ function CategoryPage() {
 
   return (
     <div className="h-full">
-      <div className="flex flex-wrap gap-7">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(22rem,1fr))] gap-7">
         {data &&
-          data.pages.map((page, index) => (
-            <div
-              key={uniqueId() + page?.nextCursor?.toString().concat(index.toString()) ?? "lastPage"}
-              className="flex flex-wrap gap-7"
-            >
-              {page.favorites.map((favorite) => (
-                <FavCard key={uniqueId() + favorite.id} favorite={favorite} refetch={refetch} />
-              ))}
-            </div>
-          ))}
+          data.pages.map((page, index) =>
+            page.favorites.map((favorite) => (
+              <FavCard key={uniqueId() + favorite.id} favorite={favorite} refetch={refetch} />
+            ))
+          )}
       </div>
       {data && data.pages[0]?.favorites.length === 0 && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -76,7 +71,7 @@ function CategoryPage() {
           </Typography>
         </div>
       )}
-      {isLoading && <Loader size={50} inButton={false} />}
+      <div className="w-full mt-3">{isLoading && <Loader size={50} inButton={false} />}</div>
 
       <span style={{ visibility: "hidden" }} ref={ref}>
         intersection observer marker
