@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npm run open-browser & next dev -p 3079",
+    "open-browser": "explorer http://localhost:3079",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
